@@ -8,26 +8,24 @@ The scrollyteller takes a series of **panels** of content nodes and turns them i
 
 The `panels` prop is in the format of:
 
-```json
-[
-  {
-    config: {
-      info: 'Some kind of config that is given when this marker is active'
-    },
-    nodes: [
-      ...DOM elements for this panel...
+    [
+      {
+        config: {
+          info: 'Some kind of config that is given when this marker is active'
+        },
+        nodes: [
+          ...DOM elements for this panel...
+        ]
+      },
+      {
+        config: {
+          thing: 'This will be given when the second marker is hit'
+        },
+        nodes: [
+          ...DOM elements for this panel...
+        ]
+      }
     ]
-  },
-  {
-    config: {
-      thing: 'This will be given when the second marker is hit'
-    },
-    nodes: [
-      ...DOM elements for this panel...
-    ]
-  }
-]
-```
 
 When a new box comes into view `onMarker` will be called with the `config` of the incoming panel.
 
