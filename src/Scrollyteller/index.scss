@@ -1,0 +1,57 @@
+.base {
+  position: relative;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+
+  * {
+    box-sizing: border-box;
+  }
+}
+
+.graphic {
+  width: 100vw;
+  height: 100vh;
+  z-index: 1;
+
+  &::after {
+    display: none;
+  }
+
+  &:not(.scrolling) {
+    clip: inherit !important;
+    clip: unset !important;
+  }
+}
+
+.before {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.during {
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+
+.after {
+  position: absolute;
+  bottom: 0;
+  height: 100vh !important;
+}
+
+.firstPanel {
+  padding-top: 100vh;
+}
+
+.lastPanel {
+  padding-bottom: 100vh;
+}
+
+@media only screen and (max-device-width: 667px) and (-webkit-min-device-pixel-ratio: 2) {
+  .base {
+    height: 100%;
+  }
+}
