@@ -1,5 +1,5 @@
 {
-  "name": "scrollyteller",
+  "name": "@abcnews/scrollyteller",
   "version": "1.0.0",
   "description": "A scrollytelling React component",
   "main": "lib/index.js",
@@ -13,6 +13,14 @@
     "scrollyteller",
     "scrollytelling"
   ],
+  "homepage": "https://github.com/abcnews/scrollyteller#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/abcnews/scrollyteller.git"
+  },
+  "bugs": {
+    "url": "https://github.com/abcnews/scrollyteller/issues"
+  },
   "author": "Nathan Hoad",
   "license": "MIT",
   "devDependencies": {

@@ -8,7 +8,7 @@ The scrollyteller takes a series of **panels** of content nodes and turns them i
 
 The `panels` prop is in the format of:
 
-```
+```json
 [
   {
     config: {
