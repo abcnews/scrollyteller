@@ -1,4 +1,4 @@
-const alternatingCaseToObject = require('alternating-case-to-object');
+const alternatingCaseToObject = require('@abcnews/alternating-case-to-object');
 
 /**
  * Finds and grabs any nodes between #scrollyteller and #endscrollyteller

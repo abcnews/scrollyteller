@@ -43,7 +43,7 @@
     "webpack": "^3.10.0"
   },
   "dependencies": {
-    "alternating-case-to-object": "^1.0.1",
+    "@abcnews/alternating-case-to-object": "^2.0.0",
     "object-assign": "^4.1.1"
   },
   "jest": {
