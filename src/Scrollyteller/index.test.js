@@ -6,6 +6,7 @@ const Panel = require('..');
 describe('Scrollyteller', () => {
   const panels = [
     {
+      id: 1,
       config: {
         right: true
       },
