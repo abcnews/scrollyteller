@@ -104,10 +104,10 @@ class Scrollyteller extends React.Component {
       <div ref={el => (this.base = el)} className={`${styles.base} ${className}`}>
         {!config.graphicInFront && graphic}
 
-        {panels.map((panel, index) => {
+        {panels.map(panel => {
           return React.createElement(panelComponent, {
             className: panelClassName,
-            key: index,
+            key: typeof panel.key !== 'undefined' ? panel.key : panel.id,
             config: assign({}, config, panel.config || {}),
             nodes: panel.nodes,
             reference: element => this.reference(panel, element)

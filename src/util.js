@@ -51,14 +51,14 @@ function loadPanels(nodes, initialMarker, name) {
   let nextConfig = initialMarker;
   let nextNodes = [];
 
-  let idx = 0;
+  let id = 0;
 
   // Commit the current nodes to a marker
   function pushPanel() {
     if (nextNodes.length === 0) return;
 
     panels.push({
-      idx: idx++,
+      id: id++,
       config: nextConfig,
       nodes: nextNodes
     });
