@@ -1,6 +1,6 @@
 {
   "name": "@abcnews/scrollyteller",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A scrollytelling React component",
   "main": "lib/index.js",
   "scripts": {
