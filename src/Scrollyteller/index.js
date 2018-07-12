@@ -22,7 +22,10 @@ class Scrollyteller extends React.Component {
 
   componentDidMount() {
     window.addEventListener('scroll', this.onScroll);
-    this.onScroll();
+
+    // Safari tries to do things before styling has kicked in
+    // so lets wait for a split second before measuring
+    setTimeout(() => this.onScroll(), 100);
 
     // Make sure Twitter cards aren't too wide on mobile
     setTimeout(() => {
