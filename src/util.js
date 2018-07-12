@@ -25,6 +25,9 @@ function loadScrollyteller(name, className, markerName) {
       if (node.tagName && (node.getAttribute('name') || '').indexOf(`endscrollyteller`) > -1) {
         hasMoreContent = false;
       } else {
+        [].slice.apply(node.querySelectorAll('.inline-caption')).forEach(child => {
+          child.parentNode.removeChild(child);
+        });
         nodes.push(node);
         node = node.nextSibling;
       }
