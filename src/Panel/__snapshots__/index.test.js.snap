@@ -3,13 +3,11 @@
 exports[`Panel renders 1`] = `
 <div
   className="base"
-  id={undefined}
 />
 `;
 
 exports[`Panel renders with some config 1`] = `
 <div
   className="base light right"
-  id={undefined}
 />
 `;
