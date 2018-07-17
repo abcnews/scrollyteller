@@ -31,16 +31,14 @@ class Panel extends React.Component {
 
   render() {
     const { config } = this.props;
-    const className =
-      this.props.className ||
-      [
-        styles.base,
-        config.light ? styles.light : null,
-        config.right ? styles.right : null,
-        config.left ? styles.left : null
-      ]
-        .filter(c => c)
-        .join(' ');
+
+    const className = [
+      this.props.className || styles.base,
+      config.light ? styles.light : null,
+      typeof config.align !== 'undefined' ? styles[config.align] : null
+    ]
+      .filter(c => c)
+      .join(' ');
 
     return <div ref={el => (this.base = el)} id={this.props.id} className={className} />;
   }
