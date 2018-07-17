@@ -9,7 +9,7 @@ describe('Panel', () => {
   });
 
   it('renders with some config', () => {
-    const tree = Renderer.create(<Panel config={{ light: true, right: true }} />).toJSON();
+    const tree = Renderer.create(<Panel config={{ light: true, align: 'right' }} />).toJSON();
     expect(tree).toMatchSnapshot();
   });
 });
