@@ -75,14 +75,16 @@
   }
 }
 
-.right {
-  margin-right: calc(30% - 24.75rem) !important;
-  width: 49.5rem !important;
-}
+@media only screen and (min-device-width: 668px) {
+  .right {
+    margin-right: calc(30% - 24.75rem) !important;
+    width: 49.5rem !important;
+  }
 
-.left {
-  margin-left: calc(30% - 24.75rem) !important;
-  width: 49.5rem !important;
+  .left {
+    margin-left: calc(30% - 24.75rem) !important;
+    width: 49.5rem !important;
+  }
 }
 
 @media only screen and (max-device-width: 667px) and (-webkit-min-device-pixel-ratio: 2) {
