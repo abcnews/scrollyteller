@@ -109,7 +109,7 @@ class Scrollyteller extends React.Component {
 
         {panels.map(panel => {
           return React.createElement(panelComponent, {
-            className: panelClassName,
+            className: `${panelClassName || ''} ${panel.className || ''}`,
             key: typeof panel.key !== 'undefined' ? panel.key : panel.id,
             config: assign({}, config, panel.config || {}),
             nodes: panel.nodes,
