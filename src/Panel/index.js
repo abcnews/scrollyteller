@@ -33,7 +33,7 @@ class Panel extends React.Component {
     const { config } = this.props;
 
     const className = [
-      this.props.className.replace(/\s+/, '') !== '' ? this.props.className : styles.base,
+      this.props.className && this.props.className.replace(/\s+/, '') !== '' ? this.props.className : styles.base,
       config.light ? styles.light : null,
       typeof config.align !== 'undefined' ? styles[config.align] : null
     ]
