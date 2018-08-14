@@ -63,6 +63,12 @@
       margin-bottom: 0;
     }
   }
+
+  & > img {
+    max-width: 66%;
+    display: block;
+    margin: auto;
+  }
 }
 
 .light {
