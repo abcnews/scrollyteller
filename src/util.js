@@ -21,8 +21,13 @@ function loadScrollyteller(name, className, markerName) {
     let node = firstNode.nextSibling;
     let nodes = [];
     let hasMoreContent = true;
+
     while (hasMoreContent && node) {
-      if (node.tagName && (node.getAttribute('name') || '').indexOf(`endscrollyteller`) > -1) {
+      if (!node.tagName) {
+        node = node.nextSibling;
+        continue;
+      }
+      if ((node.getAttribute('name') || '').indexOf(`endscrollyteller`) > -1) {
         hasMoreContent = false;
       } else {
         [].slice.apply(node.querySelectorAll('.inline-caption')).forEach(child => {
