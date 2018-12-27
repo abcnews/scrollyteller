@@ -66,6 +66,43 @@ The `Scrollyteller` can also takes a `panelClassName` prop which it will pass to
 
 To completely customise how panels are rendered you can pass in `panelComponent`. This should be a React class component (not a stateless component) and must call `props.reference(<DOMNode>)` with a valid DOM node (usually the base ref of a given panel). This is needed for detecting marker scroll positions when navigating the scrollyteller.
 
+## Usage with Odyssey
+
+When developing [ABC News](https://www.abc.net.au) stories with [Odyssey](https://github.com/abcnews/odyssey) you can use the `loadOdysseyScrollyteller` function to gather `panels` within a CoreMedia article.
+
+CoreMedia text:
+
+```
+#scrollytellerVARIABLEvalue
+This is the opening paragraph panel
+#markVARIABLEvalue
+This is a second panel
+#markVARval
+This is another paragraph
+#endscrollyteller
+```
+
+JS Code:
+
+```javascript
+const Scrollyteller = require('@abcnews/scrollyteller');
+
+const scrollyData = Scrollyteller.loadOdysseyScrollyteller(
+  "",       // If set to eg. "one" use #scrollytellerNAMEone in CoreMedia
+  "u-full", // Class to apply to mount point u-full makes it full width in Odyssey
+  "mark"    // Name of marker in CoreMedia eg. for "point" use #point default: #mark
+  );
+
+// Then pass them to the Scrollyteller component
+<Scrollyteller panels={scrollyData.panels} ... />
+
+// You could also use React Portals to mount on the mount node
+ReactDOM.createPortal(
+  <Scrollyteller ... />,
+  scrollyData.mountNode
+)
+```
+
 ## Authors
 
 * Nathan Hoad ([hoad.nathan@abc.net.au](mailto:hoad.nathan@abc.net.au))
