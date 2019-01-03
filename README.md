@@ -33,7 +33,7 @@ Example:
 
 ```javascript
 const React = require('react');
-const Scrollyteller = require('scrollyteller');
+const Scrollyteller = require('@abcnews/scrollyteller');
 
 // Some kind of dockable visualisation that goes with the scrolling text
 const GraphicOfSomeKind = require('./GraphicOfSomeKind');
