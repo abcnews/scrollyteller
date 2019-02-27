@@ -45,7 +45,7 @@ class Scrollyteller extends React.Component {
   }
 
   onScroll() {
-    const { config, panels, onMarker } = this.props;
+    const { config, panels, onMarker, scrollTween } = this.props;
 
     if (this.references.length === 0) return;
 
@@ -90,6 +90,14 @@ class Scrollyteller extends React.Component {
       }
 
       this.setState({ sticky });
+    }
+
+    // On scroll call a function with pixels and current closest panel
+    if (scrollTween && typeof scrollTween === 'function') {
+      const panel = closestReference.element.getBoundingClientRect();
+      const pixelsAboveFold = Math.ceil(fold - panel.top);
+
+      scrollTween(pixelsAboveFold, closestReference.panel);
     }
   }
 
