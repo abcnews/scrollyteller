@@ -110,13 +110,8 @@ Pass a function to `scrollTween` and scrollyteller will call that function on sc
 eg.
 
 ```javascript
-const scrollTweener = (pixelsAbove, panel) => {
-  if (panel.id !== 0) return; // Operate only in between the first panel
-  if (pixelsAbove < 0) return; // Only when past the fold
-  if (pixelsAbove > window.innerHeight) return; // Stop after scrolled past the screen
-
-  let mapPitch = pitchScale(pixelsAbove); // example of use with Mapbox
-  map.setPitch(mapPitch);
+const scrollTweener = (progress, panel, pixelsAboveFold) => {
+  map.setPitch(progress * 60);
 }
 
 // ... and in the return

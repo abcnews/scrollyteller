@@ -94,10 +94,19 @@ class Scrollyteller extends React.Component {
 
     // On scroll call a function with pixels and current closest panel
     if (scrollTween && typeof scrollTween === 'function') {
-      const panel = closestReference.element.getBoundingClientRect();
-      const pixelsAboveFold = Math.ceil(fold - panel.top);
+      const firstPanel = this.references[0].element.getBoundingClientRect();
+      const secondPanel = this.references[1].element.getBoundingClientRect();
 
-      scrollTween(pixelsAboveFold, closestReference.panel);
+      // In case there is only one panel estimate the separation
+      const panelSeparation = secondPanel ? secondPanel.top - firstPanel.top : fold;
+
+      const closestPanel = closestReference.element.getBoundingClientRect();
+      const pixelsAboveFold = Math.ceil(fold - closestPanel.top);
+
+      // Prevent accidental divide by zero
+      const progress = panelSeparation !== 0 ? pixelsAboveFold / panelSeparation : 1;
+
+      scrollTween(progress, closestReference.panel, pixelsAboveFold);
     }
   }
 
