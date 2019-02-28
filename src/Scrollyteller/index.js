@@ -107,8 +107,6 @@ class Scrollyteller extends React.Component {
         fold + closestPanel.height - closestPanel.bottom
       );
 
-      console.log(pixelsAboveFold);
-
       // Prevent accidental divide by zero
       const progress =
         panelSeparation !== 0
