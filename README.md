@@ -105,9 +105,15 @@ ReactDOM.createPortal(
 
 ## scrollTween
 
-Pass a function to `scrollTween` and scrollyteller will call that function on scroll, passing the number of pixels above the fold and the panel config.
+Pass a function to `scrollTween` and scrollyteller will call that function on scroll.
 
-eg.
+Scrollyteller will pass:
+
+1. `progress`: a floating point number starting at 0.0 to 1.0 as the user scrolls down the page
+2. `panel`: the current panel
+3. `pixelsAboveFold`: how many pixels the current panel is above the fold
+
+**Usage example:**
 
 ```javascript
 const scrollTweener = (progress, panel, pixelsAboveFold) => {
