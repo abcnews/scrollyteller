@@ -103,7 +103,36 @@ ReactDOM.createPortal(
 )
 ```
 
+## scrollTween
+
+Pass a function to `scrollTween` and scrollyteller will call that function on scroll.
+
+Scrollyteller will pass:
+
+1. `progress`: a floating point number starting at 0.0 to 1.0 as the user scrolls down the page
+2. `panel`: the current panel
+3. `pixelsAboveFold`: how many pixels the current panel is above the fold
+
+**Usage example:**
+
+```javascript
+const scrollTweener = (progress, panel, pixelsAboveFold) => {
+  map.setPitch(progress * 60);
+}
+
+// ... and in the return
+
+<Scrollyteller
+  panels={scrollyData.panels}
+  onMarker={markTrigger}
+  className={`scrolly Block is-richtext ${styles.scrollyteller}`}
+  panelClassName={"Block-content u-richtext " + styles.scrollyText}
+  scrollTween={scrollTweener} // Add this prop and parse a function
+>
+```
+
 ## Authors
 
 * Nathan Hoad ([hoad.nathan@abc.net.au](mailto:hoad.nathan@abc.net.au))
 * Simon Elvery ([elvery.simon@abc.net.au](mailto:elvery.simon@abc.net.au))
+* Joshua Byrd ([byrd.joshua@abc.net.au](mailto:byrd.joshua@abc.net.au))
