@@ -62,7 +62,7 @@ class Scrollyteller extends React.Component {
         previousPanel: state.currentPanel,
         currentPanel: closestReference.panel
       }));
-      onMarker(assign({}, closestReference.panel.config, { id: closestReference.panel.id } || {}));
+      onMarker(closestReference.panel.config, closestReference.panel.id);
     }
 
     // Fix some weird IE flickering
