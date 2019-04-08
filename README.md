@@ -62,9 +62,48 @@ class Story extends React.Component {
 module.exports = Story;
 ```
 
+## Customising
+
 The `Scrollyteller` can also takes a `panelClassName` prop which it will pass to each panel component for customising the look.
 
 To completely customise how panels are rendered you can pass in `panelComponent`. This should be a React class component (not a stateless component) and must call `props.reference(<DOMNode>)` with a valid DOM node (usually the base ref of a given panel). This is needed for detecting marker scroll positions when navigating the scrollyteller.
+
+```js
+class CustomPanel extends React.Component {
+  componentDidMount() {
+    if (!this.base) return;
+    if (!this.props.nodes) return;
+
+    this.props.nodes.forEach(node => {
+      this.base.appendChild(node);
+    });
+
+    this.props.reference(this.base);
+  }
+
+  componentWillUnmount() {
+    if (!this.base) return;
+    if (!this.props.nodes) return;
+
+    this.props.nodes.forEach(node => {
+      if (this.base.contains(node)) {
+        this.base.removeChild(node);
+      }
+    });
+  }
+
+  render() {
+    return (
+      <div ref={el => (this.base = el)} style={{ zIndex: 1, height: '80vh', fontSize: '40px' }}>
+        <strong>THIS IS A PANEL:</strong>
+        <div ref={el => (this.wrapper = el)} />
+      </div>
+    );
+  }
+}
+```
+
+And then specify `<Scrollyteller panelComponent={CustomPanel}>`.
 
 ## Usage with Odyssey
 
@@ -133,6 +172,6 @@ const scrollTweener = (progress, panel, pixelsAboveFold) => {
 
 ## Authors
 
-* Nathan Hoad ([hoad.nathan@abc.net.au](mailto:hoad.nathan@abc.net.au))
-* Simon Elvery ([elvery.simon@abc.net.au](mailto:elvery.simon@abc.net.au))
-* Joshua Byrd ([byrd.joshua@abc.net.au](mailto:byrd.joshua@abc.net.au))
+- Nathan Hoad ([hoad.nathan@abc.net.au](mailto:hoad.nathan@abc.net.au))
+- Simon Elvery ([elvery.simon@abc.net.au](mailto:elvery.simon@abc.net.au))
+- Joshua Byrd ([byrd.joshua@abc.net.au](mailto:byrd.joshua@abc.net.au))
