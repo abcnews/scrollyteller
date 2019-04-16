@@ -4,7 +4,7 @@ const assign = require('object-assign');
 
 const styles = require('./index.scss');
 
-class Scrollyteller extends React.Component {
+class Scrollyteller extends React.PureComponent {
   constructor(props) {
     super(props);
 
