@@ -1,4 +1,4 @@
-const alternatingCaseToObject = require('@abcnews/alternating-case-to-object');
+const a2o = require('@abcnews/alternating-case-to-object');
 
 /**
  * Finds and grabs any nodes between #scrollyteller and #endscrollyteller
@@ -18,6 +18,8 @@ function loadScrollyteller(name, className, markerName) {
     // Grab any nodes between #scrollytellerNAME<name>
     const firstNode = document.querySelector(`[name^=${selector}]`);
 
+    const config = a2o(firstNode.getAttribute('name').slice(selector.length));
+
     let node = firstNode.nextSibling;
     let nodes = [];
     let hasMoreContent = true;
@@ -30,18 +32,20 @@ function loadScrollyteller(name, className, markerName) {
       if ((node.getAttribute('name') || '').indexOf(`endscrollyteller`) > -1) {
         hasMoreContent = false;
       } else {
-        [].slice.apply(node.querySelectorAll('.inline-caption')).forEach(child => {
-          child.parentNode.removeChild(child);
-        });
+        if (config.captions === 'none') {
+          // Not sure why this was in here but putting it behind an optional flag
+          [].slice.apply(node.querySelectorAll('.inline-caption')).forEach(child => {
+            child.parentNode.removeChild(child);
+          });
+        }
         nodes.push(node);
         node = node.nextSibling;
       }
     }
 
-    const initialMarker = alternatingCaseToObject(firstNode.getAttribute('name').slice(selector.length));
     window.__scrollytellers[name] = {
       mountNode: createMountNode(name, className),
-      panels: loadPanels(nodes, initialMarker, markerName)
+      panels: loadPanels(nodes, config, markerName)
     };
   }
 
@@ -82,7 +86,7 @@ function loadPanels(nodes, initialMarker, name) {
       // If marker has no config then just use the previous config
       let configString = node.getAttribute('name').replace(new RegExp(`^${name}`), '');
       if (configString) {
-        nextConfig = alternatingCaseToObject(configString);
+        nextConfig = a2o(configString);
         nextConfig.hash = configString;
       } else {
         // Empty marks should stop the piecemeal flow
