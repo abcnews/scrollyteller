@@ -40,19 +40,28 @@ class Scrollyteller extends React.PureComponent {
     this.references = [];
   }
 
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.panels !== this.props.panels) {
+      // If we have new panels then forget all of the references
+      this.references = [];
+    }
+  }
+
   reference(panel, element) {
     this.references.push({ panel, element });
   }
 
   onScroll() {
-    const { config, panels, onMarker, scrollTween } = this.props;
+    const { config, onMarker, scrollTween } = this.props;
 
     if (this.references.length === 0) return;
 
     // Work out which panel is the current one
     const fold = window.innerHeight * (config.waypoint ? config.waypoint / 100 : 0.8);
     const referencesAboveTheFold = this.references.filter(r => {
-      return r.element && r.element.getBoundingClientRect().top < fold;
+      if (!r.element) return false;
+      const box = r.element.getBoundingClientRect();
+      return box.height !== 0 && box.top < fold;
     });
 
     let closestReference = referencesAboveTheFold[referencesAboveTheFold.length - 1];
@@ -98,20 +107,13 @@ class Scrollyteller extends React.PureComponent {
       const secondPanel = this.references[1].element.getBoundingClientRect();
 
       // In case there is only one panel estimate the separation
-      const panelSeparation = secondPanel
-        ? secondPanel.top - firstPanel.bottom
-        : fold;
+      const panelSeparation = secondPanel ? secondPanel.top - firstPanel.bottom : fold;
 
       const closestPanel = closestReference.element.getBoundingClientRect();
-      const pixelsAboveFold = Math.ceil(
-        fold + closestPanel.height - closestPanel.bottom
-      );
+      const pixelsAboveFold = Math.ceil(fold + closestPanel.height - closestPanel.bottom);
 
       // Prevent accidental divide by zero
-      const progress =
-        panelSeparation !== 0
-          ? pixelsAboveFold / (panelSeparation + closestPanel.height)
-          : 1;
+      const progress = panelSeparation !== 0 ? pixelsAboveFold / (panelSeparation + closestPanel.height) : 1;
 
       scrollTween(progress, closestReference.panel, pixelsAboveFold);
     }
