@@ -130,16 +130,19 @@ const scrollyData = Scrollyteller.loadOdysseyScrollyteller(
   "",       // If set to eg. "one" use #scrollytellerNAMEone in CoreMedia
   "u-full", // Class to apply to mount point u-full makes it full width in Odyssey
   "mark"    // Name of marker in CoreMedia eg. for "point" use #point default: #mark
-  );
+);
 
 // Then pass them to the Scrollyteller component
-<Scrollyteller panels={scrollyData.panels} ... />
+ReactDOM.render(
+  <Scrollyteller panels={scrollyData.panels} ... />,
+  scrollyData.mountNode
+);
 
 // You could also use React Portals to mount on the mount node
 ReactDOM.createPortal(
   <Scrollyteller ... />,
   scrollyData.mountNode
-)
+);
 ```
 
 ## scrollTween

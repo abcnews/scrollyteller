@@ -1,6 +1,7 @@
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
 module.exports = {
+  mode: process.env.NODE_ENV || 'production',
   entry: {
     index: __dirname + '/src/index.js'
   },
@@ -32,9 +33,8 @@ module.exports = {
             options: {
               camelCase: true,
               localIdentName: '[hash:base64:8]',
-              minimize: true,
               modules: true,
-              sourcemaps: false
+              sourceMap: false
             }
           },
           {
