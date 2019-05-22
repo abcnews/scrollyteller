@@ -81,7 +81,7 @@
   }
 }
 
-@media only screen and (min-device-width: 1023px) {
+@media only screen and (min-width: 1023px) {
   .right {
     margin-right: calc(30% - 24.75rem) !important;
     width: 49.5rem !important;
@@ -93,7 +93,7 @@
   }
 }
 
-@media only screen and (max-device-width: 667px) and (-webkit-min-device-pixel-ratio: 2) {
+@media only screen and (max-width: 667px) {
   .base {
     padding-top: 1.5rem;
     padding-bottom: 1.5rem;

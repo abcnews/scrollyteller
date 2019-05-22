@@ -50,7 +50,7 @@
   padding-bottom: 100vh;
 }
 
-@media only screen and (max-device-width: 667px) and (-webkit-min-device-pixel-ratio: 2) {
+@media only screen and (max-width: 667px) {
   .base {
     height: 100%;
   }
