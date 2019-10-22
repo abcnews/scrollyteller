@@ -31,32 +31,24 @@ When a new box comes into view `onMarker` will be called with the `config` of th
 
 Example:
 
-```javascript
-const React = require('react');
-const Scrollyteller = require('@abcnews/scrollyteller');
+```tsx
+import * as React from 'react';
+import Scrollyteller from '@abcnews/scrollyteller';
 
 // Some kind of dockable visualisation that goes with the scrolling text
-const GraphicOfSomeKind = require('./GraphicOfSomeKind');
+import GraphicOfSomeKind from './GraphicOfSomeKind';
 
-class Story extends React.Component {
-  constructor(props) {
-    super(props);
+export default () => {
+  const [something, setSomething] = React.useState('');
 
-    this.state = {
-      property: ''
-    };
-  }
+  // Content is loaded somehow into an array of { marker: {...}, nodes: [...DOMNodes] }
+  const panels = ...?
 
-  render() {
-    // Content is loaded somehow into an array of { marker: {...}, nodes: [...DOMNodes] }
-    const panels = ...?
-
-    return (
-      <Scrollyteller panels={panels} onMarker={config => this.setState(state => ({ property: config.thing }))}>
-        <GraphicOfSomeKind property={this.state.property} />
-      </Scrollyteller>
-    );
-  }
+  return (
+    <Scrollyteller panels={panels} onMarker={config => setSomething(config.thing)}>
+      <GraphicOfSomeKind property={something} />
+    </Scrollyteller>
+  );
 }
 
 module.exports = Story;
@@ -68,39 +60,38 @@ The `Scrollyteller` can also takes a `panelClassName` prop which it will pass to
 
 To completely customise how panels are rendered you can pass in `panelComponent`. This should be a React class component (not a stateless component) and must call `props.reference(<DOMNode>)` with a valid DOM node (usually the base ref of a given panel). This is needed for detecting marker scroll positions when navigating the scrollyteller.
 
-```js
-class CustomPanel extends React.Component {
-  componentDidMount() {
-    if (!this.base) return;
-    if (!this.props.nodes) return;
+```tsx
+import * as React from 'react';
 
-    this.props.nodes.forEach(node => {
-      this.base.appendChild(node);
-    });
-
-    this.props.reference(this.base);
-  }
-
-  componentWillUnmount() {
-    if (!this.base) return;
-    if (!this.props.nodes) return;
-
-    this.props.nodes.forEach(node => {
-      if (this.base.contains(node)) {
-        this.base.removeChild(node);
-      }
-    });
-  }
-
-  render() {
-    return (
-      <div ref={el => (this.base = el)} style={{ zIndex: 1, height: '80vh', fontSize: '40px' }}>
-        <strong>THIS IS A PANEL:</strong>
-        <div ref={el => (this.wrapper = el)} />
-      </div>
-    );
-  }
+interface Props {
+  nodes: any[];
+  reference: (base: HTMLElement) => void;
 }
+
+export default (props: Props) => {
+  const base = React.useRef(null);
+  const innerBase = React.useRef(null);
+
+  React.useEffect(() => {
+    props.reference(base.current);
+    props.nodes.forEach((node: HTMLElement) => {
+      innerBase.current.appendChild(node);
+    });
+
+    return () => {
+      props.nodes.forEach((node: HTMLElement) => {
+        innerBase.current.removeChild(node);
+      });
+    };
+  }, []);
+
+  return (
+    <div ref={base} style={{ zIndex: 1, height: '80vh', fontSize: '40px' }}>
+      <strong>THIS IS A PANEL:</strong>
+      <div ref={innerBase} />
+    </div>
+  );
+};
 ```
 
 And then specify `<Scrollyteller panelComponent={CustomPanel}>`.
@@ -123,10 +114,10 @@ This is another paragraph
 
 JS Code:
 
-```javascript
-const Scrollyteller = require('@abcnews/scrollyteller');
+```tsx
+import Scrollyteller, { loadOdysseyScrollyteller } from '@abcnews/scrollyteller';
 
-const scrollyData = Scrollyteller.loadOdysseyScrollyteller(
+const scrollyData = loadOdysseyScrollyteller(
   "",       // If set to eg. "one" use #scrollytellerNAMEone in CoreMedia
   "u-full", // Class to apply to mount point u-full makes it full width in Odyssey
   "mark"    // Name of marker in CoreMedia eg. for "point" use #point default: #mark
@@ -143,34 +134,6 @@ ReactDOM.createPortal(
   <Scrollyteller ... />,
   scrollyData.mountNode
 );
-```
-
-## scrollTween
-
-Pass a function to `scrollTween` and scrollyteller will call that function on scroll.
-
-Scrollyteller will pass:
-
-1. `progress`: a floating point number starting at 0.0 to 1.0 as the user scrolls down the page
-2. `panel`: the current panel
-3. `pixelsAboveFold`: how many pixels the current panel is above the fold
-
-**Usage example:**
-
-```javascript
-const scrollTweener = (progress, panel, pixelsAboveFold) => {
-  map.setPitch(progress * 60);
-}
-
-// ... and in the return
-
-<Scrollyteller
-  panels={scrollyData.panels}
-  onMarker={markTrigger}
-  className={`scrolly Block is-richtext ${styles.scrollyteller}`}
-  panelClassName={"Block-content u-richtext " + styles.scrollyText}
-  scrollTween={scrollTweener} // Add this prop and parse a function
->
 ```
 
 ## Authors

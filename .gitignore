@@ -1,4 +1,5 @@
 .DS_Store
-lib
+Thumbs.db
+/dist
 *.log
-node_modules
+/node_modules

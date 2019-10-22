@@ -1,26 +1,24 @@
-const a2o = require('@abcnews/alternating-case-to-object');
+import * as a2o from '@abcnews/alternating-case-to-object';
 
 /**
  * Finds and grabs any nodes between #scrollyteller and #endscrollyteller
- * @param {string?} name The hash name for a scrollyteller (optional if there is only one on the page)
- * @param {string?} className The className to apply to the mount node
- * @param {string?} markerName The hash name for markers
- * @returns {object}
+ * @param name The hash name for a scrollyteller (optional if there is only one on the page)
+ * @param className The className to apply to the mount node
+ * @param markerName The hash name for markers
  */
-function loadScrollyteller(name, className, markerName) {
+export function loadScrollyteller(name: string, className: string, markerName: string): any {
   markerName = markerName || 'mark';
-  window.__scrollytellers = window.__scrollytellers || {};
+  (window as any).__scrollytellers = (window as any).__scrollytellers || {};
 
   // Maybe there is only one on the page so we don't need to name them?
   const selector = name ? `scrollytellerNAME${name}` : 'scrollyteller';
 
-  if (!window.__scrollytellers[name]) {
+  if (!(window as any).__scrollytellers[name]) {
     // Grab any nodes between #scrollytellerNAME<name>
     const firstNode = document.querySelector(`[name^=${selector}]`);
-
     const config = a2o(firstNode.getAttribute('name').slice(selector.length));
 
-    let node = firstNode.nextSibling;
+    let node: any = firstNode.nextSibling;
     let nodes = [];
     let hasMoreContent = true;
 
@@ -34,7 +32,7 @@ function loadScrollyteller(name, className, markerName) {
       } else {
         if (config.captions === 'none') {
           // Not sure why this was in here but putting it behind an optional flag
-          [].slice.apply(node.querySelectorAll('.inline-caption')).forEach(child => {
+          [].slice.apply(node.querySelectorAll('.inline-caption')).forEach((child: any) => {
             child.parentNode.removeChild(child);
           });
         }
@@ -43,25 +41,25 @@ function loadScrollyteller(name, className, markerName) {
       }
     }
 
-    window.__scrollytellers[name] = {
+    (window as any).__scrollytellers[name] = {
       mountNode: createMountNode(name, className),
       panels: loadPanels(nodes, config, markerName)
     };
   }
 
-  return window.__scrollytellers[name];
+  return (window as any).__scrollytellers[name];
 }
 
 /**
  * Parse a list of nodes loocking for anchors starting with a given name
- * @param {array<DOMNode>} nodes
- * @param {object} initialMarker
- * @param {string} name
+ * @param nodes
+ * @param initialMarker
+ * @param name
  */
-function loadPanels(nodes, initialMarker, name) {
-  let panels = [];
+function loadPanels(nodes: any[], initialMarker: any, name: string) {
+  let panels: any[] = [];
   let nextConfig = initialMarker;
-  let nextNodes = [];
+  let nextNodes: any[] = [];
 
   let id = 0;
 
@@ -114,10 +112,10 @@ function loadPanels(nodes, initialMarker, name) {
 
 /**
  * Create a node to mount a scrollyteller on
- * @param {string} name
- * @param {string} className
+ * @param name
+ * @param className
  */
-function createMountNode(name, className) {
+export function createMountNode(name: string, className: string) {
   const selector = name ? `scrollytellerNAME${name}` : 'scrollyteller';
   const mountParent = document.querySelector(`[name^=${selector}]`);
   const mountNode = document.createElement('div');
@@ -126,5 +124,3 @@ function createMountNode(name, className) {
 
   return mountNode;
 }
-
-module.exports = { loadScrollyteller, createMountNode };
