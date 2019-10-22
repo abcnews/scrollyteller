@@ -37,6 +37,8 @@
     "identity-obj-proxy": "^3.0.0",
     "jest": "^24.9.0",
     "node-sass": "^4.12.0",
+    "react": "^16.10.2",
+    "react-dom": "^16.10.2",
     "sass-loader": "^7.1.0",
     "style-loader": "^0.23.1",
     "ts-jest": "^24.1.0",
@@ -47,9 +49,10 @@
   },
   "dependencies": {
     "@abcnews/alternating-case-to-object": "^2.0.0",
-    "object-assign": "^4.1.1",
-    "react": "^16.10.2",
-    "react-dom": "^16.10.2"
+    "object-assign": "^4.1.1"
+  },
+  "peerDependencies": {
+    "react": "^16.10.2"
   },
   "jest": {
     "moduleFileExtensions": [
