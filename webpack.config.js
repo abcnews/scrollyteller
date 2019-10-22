@@ -1,25 +1,23 @@
-const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
-
 module.exports = {
   mode: process.env.NODE_ENV || 'production',
   entry: {
-    index: __dirname + '/src/index.js'
+    index: __dirname + '/src/index.ts'
   },
   output: {
-    path: __dirname + '/lib',
+    path: __dirname + '/dist',
     publicPath: '/',
     filename: 'index.js',
     libraryTarget: 'commonjs2'
   },
+  resolve: {
+    extensions: ['.ts', '.tsx', '.js']
+  },
   module: {
     rules: [
       {
-        test: /\.js$/,
+        test: /\.tsx?$/,
         include: __dirname + '/src',
-        loader: 'babel-loader',
-        options: {
-          cacheDirectory: true
-        }
+        loader: 'ts-loader'
       },
       {
         test: /\.s?css$/,
@@ -53,10 +51,5 @@ module.exports = {
         amd: 'react'
       }
     }
-  ],
-  plugins: [
-    new UglifyJSPlugin({
-      parallel: true
-    })
   ]
 };

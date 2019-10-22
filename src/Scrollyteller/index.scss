@@ -17,11 +17,6 @@
   &::after {
     display: none;
   }
-
-  &:not(.scrolling) {
-    clip: inherit !important;
-    clip: unset !important;
-  }
 }
 
 .before {

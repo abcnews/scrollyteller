@@ -1,0 +1,12 @@
+{
+  "exclude": ["dist", "node_modules"],
+  "compilerOptions": {
+    "outDir": "dist",
+    "noImplicitAny": true,
+    "declaration": true,
+    "jsx": "react",
+    "lib": ["es2015", "dom"],
+    "module": "commonjs",
+    "target": "es5"
+  }
+}
