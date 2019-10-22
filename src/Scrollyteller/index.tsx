@@ -29,8 +29,6 @@ export default (props: Props) => {
   const base = React.useRef(null);
 
   const [currentPanel, setCurrentPanel] = React.useState(null);
-
-  const [isScrolling, setIsScrolling] = React.useState(false);
   const [backgroundAttachment, setBackgroundAttachment] = React.useState('before');
 
   // Track panel divs so we know which one is the current one
@@ -95,11 +93,7 @@ export default (props: Props) => {
 
   // RENDER
 
-  const graphic = (
-    <div className={`${styles.graphic} ${styles[backgroundAttachment]} ${isScrolling ? styles.scrolling : ''}`}>
-      {props.children}
-    </div>
-  );
+  const graphic = <div className={`${styles.graphic} ${styles[backgroundAttachment]}`}>{props.children}</div>;
 
   return (
     <div ref={base} className={`${styles.base} ${props.className || ''}`}>
