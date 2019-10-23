@@ -45,7 +45,7 @@ export default (props: Props) => {
 
   const className = [
     props.className.replace(/\s+/, '') !== '' ? props.className : styles.base,
-    props.config.light ? styles.light : null,
+    typeof props.config.theme !== 'undefined' ? styles[props.config.theme] : null,
     typeof props.config.align !== 'undefined' ? styles[props.config.align] : null
   ]
     .filter(c => c)
