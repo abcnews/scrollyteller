@@ -15,7 +15,7 @@ describe('Panel', () => {
   });
 
   it('renders with some config', () => {
-    const { container } = render(<Panel nodes={[]} config={{ light: true, align: 'right' }} />);
+    const { container } = render(<Panel nodes={[]} config={{ theme: 'light', align: 'right' }} />);
 
     expect(container.firstElementChild.className).toContain('light');
     expect(container.firstElementChild.className).toContain('right');
