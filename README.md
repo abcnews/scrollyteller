@@ -58,7 +58,7 @@ module.exports = Story;
 
 The `Scrollyteller` can also takes a `panelClassName` prop which it will pass to each panel component for customising the look.
 
-To completely customise how panels are rendered you can pass in `panelComponent`. This should be a React class component (not a stateless component) and must call `props.reference(<DOMNode>)` with a valid DOM node (usually the base ref of a given panel). This is needed for detecting marker scroll positions when navigating the scrollyteller.
+To completely customise how panels are rendered you can pass in `panelComponent`. The main requirement for this component is that it calls `props.reference` with a ref to its outermost wrapper.
 
 ```tsx
 import * as React from 'react';
@@ -115,9 +115,9 @@ This is another paragraph
 JS Code:
 
 ```tsx
-import Scrollyteller, { loadOdysseyScrollyteller } from '@abcnews/scrollyteller';
+import Scrollyteller, { loadScrollyteller } from '@abcnews/scrollyteller';
 
-const scrollyData = loadOdysseyScrollyteller(
+const scrollyData = loadScrollyteller(
   "",       // If set to eg. "one" use #scrollytellerNAMEone in CoreMedia
   "u-full", // Class to apply to mount point u-full makes it full width in Odyssey
   "mark"    // Name of marker in CoreMedia eg. for "point" use #point default: #mark
