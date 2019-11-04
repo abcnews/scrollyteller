@@ -2,6 +2,7 @@ import * as React from 'react';
 import * as assign from 'object-assign';
 
 import Panel from '../Panel';
+import * as panelStyles from '../Panel/index.scss';
 import * as styles from './index.scss';
 
 interface Props {
@@ -11,10 +12,14 @@ interface Props {
   onMarker?: (config: any, id: string) => void;
   className?: string;
   panelClassName?: string;
+  firstPanelClassName?: string;
+  lastPanelClassName?: string;
   panelComponent?: any;
 }
 
 const references: any[] = [];
+
+const cn = (candidates: any[]) => candidates.filter((x: any): string => x).join(' ');
 
 export default (props: Props) => {
   props = assign(
@@ -94,14 +99,22 @@ export default (props: Props) => {
   // RENDER
 
   const graphic = <div className={`${styles.graphic} ${styles[backgroundAttachment]}`}>{props.children}</div>;
+  const numPanels = props.panels.length;
 
   return (
     <div ref={base} className={`${styles.base} ${props.className || ''}`}>
       {!props.config.graphicInFront && graphic}
 
-      {props.panels.map(panel => {
+      {props.panels.map((panel, index) => {
         return React.createElement(props.panelComponent || Panel, {
-          className: `${props.panelClassName || ''} ${panel.className || ''}`,
+          className: cn([
+            props.panelClassName,
+            panel.className,
+            index === 0 && props.firstPanelClassName,
+            index === 0 && panelStyles.first,
+            index === numPanels - 1 && props.lastPanelClassName,
+            index === numPanels - 1 && panelStyles.last
+          ]),
           key: typeof panel.key !== 'undefined' ? panel.key : panel.id,
           config: assign({}, props.config, panel.config || {}),
           nodes: panel.nodes,
