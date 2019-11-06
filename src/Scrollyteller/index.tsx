@@ -35,7 +35,7 @@ const Scrollyteller = React.memo((props: Props) => {
 
   const base = React.useRef(null);
 
-  let currentPanel:any = null;
+  let currentPanel: any = null;
   const [backgroundAttachment, setBackgroundAttachment] = React.useState(
     "before"
   );
@@ -45,7 +45,7 @@ const Scrollyteller = React.memo((props: Props) => {
     references.push({ panel, element });
   }
 
-  function onScroll() {
+  function onScroll(options: any) {
     const { config, onMarker } = props;
 
     if (references.length === 0) return;
@@ -65,7 +65,8 @@ const Scrollyteller = React.memo((props: Props) => {
 
     if (currentPanel !== closestReference.panel) {
       currentPanel = closestReference.panel;
-      onMarker(closestReference.panel.config, closestReference.panel.id);
+      if (options.dontFireMarker) console.log("Not firing");
+      else onMarker(closestReference.panel.config, closestReference.panel.id);
     }
 
     // Work out if the background should be fixed or not
@@ -89,7 +90,10 @@ const Scrollyteller = React.memo((props: Props) => {
     // Safari tries to do things before styling has kicked in
     // so lets wait for a split second before measuring.
     // Fires inital marker on page load, unless overridden
-    setTimeout(() => onScroll(), 100);
+    setTimeout(
+      () => onScroll({ dontFireMarker: !props.fireInitialMarker }),
+      100
+    );
 
     // Make sure Twitter cards aren't too wide on mobile
     setTimeout(() => {
