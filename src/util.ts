@@ -77,7 +77,11 @@ function loadPanels(nodes: any[], initialMarker: any, name: string) {
 
   // Check the section nodes for panels and marker content
   nodes.forEach((node, index) => {
-    if (node.tagName === 'A' && node.getAttribute('name') && node.getAttribute('name').indexOf(name) === 0) {
+    if (
+      node.tagName === 'A' &&
+      node.getAttribute('name') &&
+      node.getAttribute('name').indexOf(name) === 0
+    ) {
       // Found a new marker so we should commit the last one
       pushPanel();
 

@@ -42,4 +42,16 @@ describe('Scrollyteller', () => {
     const graphic = container.querySelector('.graphic');
     expect(container.firstElementChild.childNodes.item(1)).toBe(graphic);
   });
+
+  it('can add first/last className to the first/last panel', () => {
+    const { container } = render(
+      <Scrollyteller panels={panels}>
+        <div id="graphic" />
+      </Scrollyteller>
+    );
+
+    const panel = container.querySelector('p').parentElement;
+    expect(panel.className.indexOf('first')).toBeGreaterThan(-1);
+    expect(panel.className.indexOf('last')).toBeGreaterThan(-1);
+  });
 });

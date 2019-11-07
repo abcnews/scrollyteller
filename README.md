@@ -56,7 +56,8 @@ module.exports = Story;
 
 ## Customising
 
-The `Scrollyteller` can also takes a `panelClassName` prop which it will pass to each panel component for customising the look.
+The `Scrollyteller` can take a `panelClassName` prop which it will pass to each panel component for customising the look.
+It can also take `firstPanelClassName` and `lastPanelClassName` props which it will pass to the respective panel components, for customising their specific looks.
 
 To completely customise how panels are rendered you can pass in `panelComponent`. The main requirement for this component is that it calls `props.reference` with a ref to its outermost wrapper.
 

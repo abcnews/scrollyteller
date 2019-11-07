@@ -6,7 +6,8 @@
   "scripts": {
     "test": "jest",
     "compile": "webpack",
-    "prepublishOnly": "npm run compile && npm run test"
+    "prepublishOnly": "npm run compile && npm run test",
+    "dev": "webpack --watch"
   },
   "keywords": [
     "react",

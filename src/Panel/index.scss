@@ -14,11 +14,11 @@
 
   width: 61.25rem;
 
-  &:first-of-type {
+  &.first {
     margin-top: 100vh;
   }
 
-  &:last-of-type {
+  &.last {
     margin-bottom: 100vh;
   }
 
