@@ -1,9 +1,9 @@
-import * as React from "react";
-import * as assign from "object-assign";
+import * as React from 'react';
+import * as assign from 'object-assign';
 
-import Panel from "../Panel";
-import * as panelStyles from "../Panel/index.scss";
-import * as styles from "./index.scss";
+import Panel from '../Panel';
+import * as panelStyles from '../Panel/index.scss';
+import * as styles from './index.scss';
 
 interface Props {
   children: any;
@@ -20,8 +20,7 @@ interface Props {
 
 const references: any[] = [];
 
-const cn = (candidates: any[]) =>
-  candidates.filter((x: any): string => x).join(" ");
+const cn = (candidates: any[]) => candidates.filter((x: any): string => x).join(' ');
 
 const Scrollyteller = React.memo((props: Props) => {
   props = assign(
@@ -36,9 +35,7 @@ const Scrollyteller = React.memo((props: Props) => {
   const base = React.useRef(null);
 
   let currentPanel: any = null;
-  const [backgroundAttachment, setBackgroundAttachment] = React.useState(
-    "before"
-  );
+  const [backgroundAttachment, setBackgroundAttachment] = React.useState('before');
 
   // Track panel divs so we know which one is the current one
   function reference(panel: any, element: any) {
@@ -51,16 +48,14 @@ const Scrollyteller = React.memo((props: Props) => {
     if (references.length === 0) return;
 
     // Work out which panel is the current one
-    const fold =
-      window.innerHeight * (config.waypoint ? config.waypoint / 100 : 0.8);
+    const fold = window.innerHeight * (config.waypoint ? config.waypoint / 100 : 0.8);
     const referencesAboveTheFold = references.filter((r: any) => {
       if (!r.element) return false;
       const box = r.element.getBoundingClientRect();
       return box.height !== 0 && box.top < fold;
     });
 
-    let closestReference =
-      referencesAboveTheFold[referencesAboveTheFold.length - 1];
+    let closestReference = referencesAboveTheFold[referencesAboveTheFold.length - 1];
     if (!closestReference) closestReference = references[0];
 
     if (currentPanel !== closestReference.panel) {
@@ -75,11 +70,11 @@ const Scrollyteller = React.memo((props: Props) => {
 
       let sticky;
       if (bounds.top > 0) {
-        sticky = "before";
+        sticky = 'before';
       } else if (bounds.bottom < window.innerHeight) {
-        sticky = "after";
+        sticky = 'after';
       } else {
-        sticky = "during";
+        sticky = 'during';
       }
 
       setBackgroundAttachment(sticky);
@@ -95,31 +90,26 @@ const Scrollyteller = React.memo((props: Props) => {
     // Make sure Twitter cards aren't too wide on mobile
     setTimeout(() => {
       [].slice
-        .call(
-          document.querySelectorAll(`${styles.base} .twitter-tweet-rendered`)
-        )
+        .call(document.querySelectorAll(`${styles.base} .twitter-tweet-rendered`))
         .forEach((card: any) => {
-          card.style.setProperty("width", "100%");
+          card.style.setProperty('width', '100%');
         });
     }, 1000);
 
-    window.addEventListener("scroll", onScroll);
+    window.addEventListener('scroll', onScroll);
     return () => {
-      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener('scroll', onScroll);
     };
   }, []);
 
   // RENDER
-
   const graphic = (
-    <div className={`${styles.graphic} ${styles[backgroundAttachment]}`}>
-      {props.children}
-    </div>
+    <div className={`${styles.graphic} ${styles[backgroundAttachment]}`}>{props.children}</div>
   );
   const numPanels = props.panels.length;
 
   return (
-    <div ref={base} className={`${styles.base} ${props.className || ""}`}>
+    <div ref={base} className={`${styles.base} ${props.className || ''}`}>
       {!props.config.graphicInFront && graphic}
 
       {props.panels.map((panel, index) => {
@@ -132,7 +122,7 @@ const Scrollyteller = React.memo((props: Props) => {
             index === numPanels - 1 && props.lastPanelClassName,
             index === numPanels - 1 && panelStyles.last
           ]),
-          key: typeof panel.key !== "undefined" ? panel.key : panel.id,
+          key: typeof panel.key !== 'undefined' ? panel.key : panel.id,
           config: assign({}, props.config, panel.config || {}),
           nodes: panel.nodes,
           reference: (element: any) => reference(panel, element)
