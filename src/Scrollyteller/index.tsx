@@ -116,6 +116,7 @@ const Scrollyteller = React.memo((props: Props) => {
         return React.createElement(props.panelComponent || Panel, {
           className: cn([
             props.panelClassName,
+            panelStyles.base,
             panel.className,
             index === 0 && props.firstPanelClassName,
             index === 0 && panelStyles.first,
