@@ -5,11 +5,17 @@ import Panel from '../Panel';
 import * as panelStyles from '../Panel/index.scss';
 import * as styles from './index.scss';
 
+interface UpdateManager {
+  subscribe: (onUpdate: (this: Window, ev: UIEvent) => any) => void;
+  unsubscribe: (onUpdate: (this: Window, ev: UIEvent) => any) => void;
+}
+
 interface Props {
   children: any;
   panels: any[];
   config?: any;
   onMarker?: (config: any, id: string) => void;
+  updateManager?: UpdateManager;
   className?: string;
   panelClassName?: string;
   firstPanelClassName?: string;
@@ -21,6 +27,15 @@ interface Props {
 const references: any[] = [];
 
 const cn = (candidates: any[]) => candidates.filter((x: any): string => x).join(' ');
+
+const defaultUpdateManager: UpdateManager = {
+  subscribe: onUpdate => {
+    window.addEventListener('scroll', onUpdate);
+  },
+  unsubscribe: onUpdate => {
+    window.removeEventListener('scroll', onUpdate);
+  }
+};
 
 const Scrollyteller = React.memo((props: Props) => {
   props = assign(
@@ -34,6 +49,10 @@ const Scrollyteller = React.memo((props: Props) => {
 
   const base = React.useRef(null);
 
+  const updateManager = React.useMemo(() => props.updateManager || defaultUpdateManager, [
+    props.updateManager
+  ]);
+
   let currentPanel: any = null;
   const [backgroundAttachment, setBackgroundAttachment] = React.useState('before');
 
@@ -42,7 +61,7 @@ const Scrollyteller = React.memo((props: Props) => {
     references.push({ panel, element });
   }
 
-  function onScroll(event: any, dontFireInitialMarker?: boolean) {
+  function onUpdate(event: any, dontFireInitialMarker?: boolean) {
     const { config, onMarker } = props;
 
     if (references.length === 0) return;
@@ -85,7 +104,7 @@ const Scrollyteller = React.memo((props: Props) => {
     // Safari tries to do things before styling has kicked in
     // so lets wait for a split second before measuring.
     // Fires inital marker on page load, unless overridden
-    setTimeout(() => onScroll(null, props.dontFireInitialMarker), 100);
+    setTimeout(() => onUpdate(null, props.dontFireInitialMarker), 100);
 
     // Make sure Twitter cards aren't too wide on mobile
     setTimeout(() => {
@@ -96,9 +115,10 @@ const Scrollyteller = React.memo((props: Props) => {
         });
     }, 1000);
 
-    window.addEventListener('scroll', onScroll);
+    updateManager.subscribe(onUpdate);
+
     return () => {
-      window.removeEventListener('scroll', onScroll);
+      updateManager.unsubscribe(onUpdate);
     };
   }, []);
 
