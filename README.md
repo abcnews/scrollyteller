@@ -99,7 +99,7 @@ And then specify `<Scrollyteller panelComponent={CustomPanel}>`.
 
 ## Usage with Odyssey
 
-When developing [ABC News](https://www.abc.net.au) stories with [Odyssey](https://github.com/abcnews/odyssey) you can use the `loadOdysseyScrollyteller` function to gather `panels` within a CoreMedia article.
+When developing [ABC News](https://www.abc.net.au) stories with [Odyssey](https://github.com/abcnews/odyssey) you can use the `loadScrollyteller` function to gather `panels` within a CoreMedia article.
 
 CoreMedia text:
 
