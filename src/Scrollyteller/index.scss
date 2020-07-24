@@ -7,15 +7,15 @@
   * {
     box-sizing: border-box;
   }
-
-  // Chrome fix https://stackoverflow.com/a/28906246/955917
-  -webkit-transform: translate3d(0,0,0);
 }
 
 .graphic {
   width: 100vw;
   height: 100vh;
   z-index: 1;
+
+  // Chrome fix https://stackoverflow.com/a/28906246/955917
+  -webkit-transform: translate3d(0, 0, 0);
 
   &::after {
     display: none;
