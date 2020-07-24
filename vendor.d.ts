@@ -1,4 +1,3 @@
 declare module '@abcnews/alternating-case-to-object';
-declare module 'object-assign';
-
+declare module '@abcnews/mount-utils';
 declare module '*.scss';

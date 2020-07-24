@@ -1,33 +1,29 @@
 import * as React from 'react';
-import * as assign from 'object-assign';
-
+const { useEffect, useRef } = React;
 import * as styles from './index.scss';
 
 interface Props {
   id?: string;
   className?: string;
   config?: any;
-  nodes?: any[];
-  reference?: (baseNode: HTMLElement) => void;
+  nodes?: Element[];
+  reference?: (baseNode: Element) => void;
 }
 
-export default (props: Props) => {
-  props = assign(
-    {},
-    {
-      className: '',
-      config: {},
-      nodes: []
-    },
-    props
-  );
+const Panel = (props: Props) => {
+  props = {
+    className: '',
+    config: {},
+    nodes: [],
+    ...props
+  };
 
-  const base: React.MutableRefObject<HTMLDivElement> = React.useRef(null);
+  const base: React.MutableRefObject<HTMLDivElement> = useRef();
 
   // Manage nodes and let the Scrollyteller know about the base DIV
-  React.useEffect(() => {
-    if (base.current && props.nodes) {
-      props.nodes.forEach((node: HTMLElement) => {
+  useEffect(() => {
+    if (props.nodes) {
+      props.nodes.forEach((node) => {
         base.current.appendChild(node);
       });
     }
@@ -35,8 +31,8 @@ export default (props: Props) => {
     props.reference && props.reference(base.current);
 
     return () => {
-      if (base.current && props.nodes) {
-        props.nodes.forEach((node: HTMLElement) => {
+      if (props.nodes) {
+        props.nodes.forEach((node) => {
           base.current.removeChild(node);
         });
       }
@@ -48,8 +44,12 @@ export default (props: Props) => {
     typeof props.config.theme !== 'undefined' ? styles[props.config.theme] : null,
     typeof props.config.align !== 'undefined' ? styles[props.config.align] : null
   ]
-    .filter(c => c)
+    .filter((c) => c)
     .join(' ');
 
   return <div ref={base} id={props.id} className={className} />;
 };
+
+Panel.displayName = 'Panel';
+
+export default Panel;
