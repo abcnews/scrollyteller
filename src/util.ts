@@ -1,4 +1,23 @@
-import * as a2o from '@abcnews/alternating-case-to-object';
+import * as acto from '@abcnews/alternating-case-to-object';
+import {
+  exactMountSelector,
+  getTrailingMountValue,
+  isMount,
+  isPrefixedMount,
+  prefixedMountSelector
+} from '@abcnews/mount-utils';
+import { ACTOConfig, Panel, Scrollyteller } from './types';
+
+declare global {
+  interface Window {
+    __scrollytellers: {
+      [key: string]: Scrollyteller;
+    };
+  }
+}
+
+const SELECTOR_COMMON = 'scrollyteller';
+const CLOSING_MOUNT_SELECTOR = exactMountSelector(`end${SELECTOR_COMMON}`);
 
 /**
  * Finds and grabs any nodes between #scrollyteller and #endscrollyteller
@@ -6,48 +25,46 @@ import * as a2o from '@abcnews/alternating-case-to-object';
  * @param className The className to apply to the mount node
  * @param markerName The hash name for markers
  */
-export function loadScrollyteller(name: string, className: string, markerName: string): any {
+export function loadScrollyteller(
+  name?: string,
+  className?: string,
+  markerName?: string
+): Scrollyteller {
   markerName = markerName || 'mark';
-  (window as any).__scrollytellers = (window as any).__scrollytellers || {};
+  window.__scrollytellers = window.__scrollytellers || {};
 
-  // Maybe there is only one on the page so we don't need to name them?
-  const selector = name ? `scrollytellerNAME${name}` : 'scrollyteller';
+  const openingMountValuePrefix: string = `${SELECTOR_COMMON}${name ? `NAME${name}` : ''}`;
+  const openingMountSelector: string = prefixedMountSelector(openingMountValuePrefix);
 
-  if (!(window as any).__scrollytellers[name]) {
-    // Grab any nodes between #scrollytellerNAME<name>
-    const firstNode = document.querySelector(`[name^=${selector}]`);
-    const config = a2o(firstNode.getAttribute('name').slice(selector.length));
+  if (!window.__scrollytellers[name]) {
+    const firstEl: Element = document.querySelector(openingMountSelector);
 
-    let node: any = firstNode.nextSibling;
-    let nodes = [];
-    let hasMoreContent = true;
+    if (!isMount(firstEl)) {
+      return;
+    }
 
-    while (hasMoreContent && node) {
-      if (!node.tagName) {
-        node = node.nextSibling;
-        continue;
-      }
-      if ((node.getAttribute('name') || '').indexOf(`endscrollyteller`) > -1) {
+    const config: ACTOConfig = acto(getTrailingMountValue(firstEl, openingMountValuePrefix));
+
+    let el: Element = firstEl.nextElementSibling;
+    let els: Element[] = [];
+    let hasMoreContent: boolean = true;
+
+    while (hasMoreContent && el) {
+      if (isMount(el) && el.matches(CLOSING_MOUNT_SELECTOR)) {
         hasMoreContent = false;
       } else {
-        if (config.captions === 'none') {
-          // Not sure why this was in here but putting it behind an optional flag
-          [].slice.apply(node.querySelectorAll('.inline-caption')).forEach((child: any) => {
-            child.parentNode.removeChild(child);
-          });
-        }
-        nodes.push(node);
-        node = node.nextSibling;
+        els.push(el);
+        el = el.nextElementSibling;
       }
     }
 
-    (window as any).__scrollytellers[name] = {
+    window.__scrollytellers[name] = {
       mountNode: createMountNode(name, className),
-      panels: loadPanels(nodes, config, markerName)
+      panels: loadPanels(els, config, markerName)
     };
   }
 
-  return (window as any).__scrollytellers[name];
+  return window.__scrollytellers[name];
 }
 
 /**
@@ -56,12 +73,11 @@ export function loadScrollyteller(name: string, className: string, markerName: s
  * @param initialMarker
  * @param name
  */
-function loadPanels(nodes: any[], initialMarker: any, name: string) {
-  let panels: any[] = [];
-  let nextConfig = initialMarker;
-  let nextNodes: any[] = [];
-
-  let id = 0;
+function loadPanels(nodes: Node[], initialMarker: ACTOConfig, name: string): Panel[] {
+  let panels: Panel[] = [];
+  let nextConfig: ACTOConfig = initialMarker;
+  let nextNodes: Node[] = [];
+  let id: number = 0;
 
   // Commit the current nodes to a marker
   function pushPanel() {
@@ -76,25 +92,22 @@ function loadPanels(nodes: any[], initialMarker: any, name: string) {
   }
 
   // Check the section nodes for panels and marker content
-  nodes.forEach((node, index) => {
-    if (
-      node.tagName === 'A' &&
-      node.getAttribute('name') &&
-      node.getAttribute('name').indexOf(name) === 0
-    ) {
+  nodes.forEach((node: Node, index: number) => {
+    if (isPrefixedMount(node, name)) {
       // Found a new marker so we should commit the last one
       pushPanel();
 
       // If marker has no config then just use the previous config
-      let configString = node.getAttribute('name').replace(new RegExp(`^${name}`), '');
+      let configString: string = getTrailingMountValue(node, name);
+
       if (configString) {
-        nextConfig = a2o(configString);
+        nextConfig = acto(configString);
         nextConfig.hash = configString;
       } else {
         // Empty marks should stop the piecemeal flow
         nextConfig.piecemeal = false;
       }
-    } else if (!node.mountable) {
+    } else {
       // Any other nodes just get grouped for the next marker
       nextNodes.push(node);
       node.parentNode.removeChild(node);
@@ -119,12 +132,25 @@ function loadPanels(nodes: any[], initialMarker: any, name: string) {
  * @param name
  * @param className
  */
-export function createMountNode(name: string, className: string) {
-  const selector = name ? `scrollytellerNAME${name}` : 'scrollyteller';
-  const mountParent = document.querySelector(`[name^=${selector}]`);
-  const mountNode = document.createElement('div');
+export function createMountNode(name?: string, className?: string): Element {
+  const openingMountValuePrefix: string = `${SELECTOR_COMMON}${name ? `NAME${name}` : ''}`;
+  const openingMountSelector: string = prefixedMountSelector(openingMountValuePrefix);
+  const mountSibling: Element | null = document.querySelector(openingMountSelector);
+
+  if (mountSibling === null) {
+    throw new Error('Mount node needs a sibling element');
+  }
+
+  const mountParent: Element | null = mountSibling.parentElement;
+
+  if (mountParent === null) {
+    throw new Error('Mount node needs a parent element');
+  }
+
+  const mountNode: Element = document.createElement('div');
+
   mountNode.className = className || '';
-  mountParent.parentNode.insertBefore(mountNode, mountParent);
+  mountParent.insertBefore(mountNode, mountSibling);
 
   return mountNode;
 }

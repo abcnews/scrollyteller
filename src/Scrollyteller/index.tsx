@@ -1,6 +1,5 @@
 import * as React from 'react';
-import * as assign from 'object-assign';
-
+const { createElement, memo, useEffect, useRef, useState } = React;
 import Panel from '../Panel';
 import * as panelStyles from '../Panel/index.scss';
 import * as styles from './index.scss';
@@ -22,27 +21,24 @@ const references: any[] = [];
 
 const cn = (candidates: any[]) => candidates.filter((x: any): string => x).join(' ');
 
-const Scrollyteller = React.memo((props: Props) => {
-  props = assign(
-    {},
-    {
-      panels: [],
-      config: {}
-    },
-    props
-  );
+const Scrollyteller = (props: Props) => {
+  props = {
+    panels: [],
+    config: {},
+    ...props
+  };
 
-  const base = React.useRef(null);
+  const base = useRef(null);
 
   let currentPanel: any = null;
-  const [backgroundAttachment, setBackgroundAttachment] = React.useState('before');
+  const [backgroundAttachment, setBackgroundAttachment] = useState('before');
 
   // Track panel divs so we know which one is the current one
   function reference(panel: any, element: any) {
     references.push({ panel, element });
   }
 
-  function onScroll(event: any, dontFireInitialMarker?: boolean) {
+  function onScroll(_event: any, dontFireInitialMarker?: boolean) {
     const { config, onMarker } = props;
 
     if (references.length === 0) return;
@@ -60,8 +56,9 @@ const Scrollyteller = React.memo((props: Props) => {
 
     if (currentPanel !== closestReference.panel) {
       currentPanel = closestReference.panel;
-      if (!dontFireInitialMarker)
+      if (!dontFireInitialMarker) {
         onMarker(closestReference.panel.config, closestReference.panel.id);
+      }
     }
 
     // Work out if the background should be fixed or not
@@ -81,7 +78,7 @@ const Scrollyteller = React.memo((props: Props) => {
     }
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     // Safari tries to do things before styling has kicked in
     // so lets wait for a split second before measuring.
     // Fires inital marker on page load, unless overridden
@@ -113,7 +110,7 @@ const Scrollyteller = React.memo((props: Props) => {
       {!props.config.graphicInFront && graphic}
 
       {props.panels.map((panel, index) => {
-        return React.createElement(props.panelComponent || Panel, {
+        return createElement(props.panelComponent || Panel, {
           className: cn([
             props.panelClassName,
             panelStyles.base,
@@ -124,7 +121,10 @@ const Scrollyteller = React.memo((props: Props) => {
             index === numPanels - 1 && panelStyles.last
           ]),
           key: typeof panel.key !== 'undefined' ? panel.key : panel.id,
-          config: assign({}, props.config, panel.config || {}),
+          config: {
+            ...props.config,
+            ...(panel.config || {})
+          },
           nodes: panel.nodes,
           reference: (element: any) => reference(panel, element)
         });
@@ -133,6 +133,8 @@ const Scrollyteller = React.memo((props: Props) => {
       {props.config.graphicInFront && graphic}
     </div>
   );
-});
+};
 
-export default Scrollyteller;
+Scrollyteller.displayName = 'Scrollyteller';
+
+export default memo(Scrollyteller);
