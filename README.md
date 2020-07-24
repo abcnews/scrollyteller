@@ -139,6 +139,7 @@ ReactDOM.createPortal(
 
 ## Authors
 
-- Nathan Hoad ([hoad.nathan@abc.net.au](mailto:hoad.nathan@abc.net.au))
+- Nathan Hoad ([nathan@nathanhoad.net](mailto:nathan@nathanhoad.net))
 - Simon Elvery ([elvery.simon@abc.net.au](mailto:elvery.simon@abc.net.au))
 - Joshua Byrd ([byrd.joshua@abc.net.au](mailto:byrd.joshua@abc.net.au))
+- Colin Gourlay ([gourlay.colin@abc.net.au](mailto:gourlay.colin@abc.net.au))
