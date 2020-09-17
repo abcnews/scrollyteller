@@ -30,6 +30,16 @@ const Scrollyteller = (props: Props) => {
 
   const base = useRef<HTMLDivElement>(null);
 
+  // Create and update onMarkerRef to make sure state inside
+  // the onMarker callback is up to date.
+  // This happens because useEffects attaching event listeners
+  // is executed only once, meaning that state inside callbacks (onMarker)
+  // will always have intial values.
+  const onMarkerRef = useRef(null);
+  useEffect(() => {
+    onMarkerRef.current = props.onMarker;
+  });
+
   let currentPanel: any = null;
   const [backgroundAttachment, setBackgroundAttachment] = useState('before');
 
@@ -39,7 +49,7 @@ const Scrollyteller = (props: Props) => {
   }
 
   function onScroll(_event: any, dontFireInitialMarker?: boolean) {
-    const { config, onMarker } = props;
+    const { config } = props;
 
     if (references.length === 0) return;
 
@@ -59,8 +69,10 @@ const Scrollyteller = (props: Props) => {
     if (currentPanel !== closestReference.panel) {
       currentPanel = closestReference.panel;
       if (!dontFireInitialMarker) {
-        onMarker &&
-          onMarker(closestReference.panel.config, closestReference.panel.id);
+        onMarkerRef.current(
+          closestReference.panel.config,
+          closestReference.panel.id
+        );
       }
     }
 
