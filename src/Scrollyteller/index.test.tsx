@@ -10,10 +10,10 @@ describe('Scrollyteller', () => {
     {
       id: 1,
       config: {
-        right: true
+        right: true,
       },
-      nodes: [p]
-    }
+      nodes: [p],
+    },
   ];
 
   it('renders', () => {
@@ -25,11 +25,11 @@ describe('Scrollyteller', () => {
 
     const graphic = container.querySelector('.graphic');
     expect(graphic).not.toBeNull();
-    expect(graphic.classList).toContain('before');
+    expect(graphic && graphic.classList).toContain('before');
 
     const panelNode = container.querySelector('p');
     expect(panelNode).not.toBeNull();
-    expect(panelNode.textContent).toBe(p.textContent);
+    expect(panelNode && panelNode.textContent).toBe(p.textContent);
   });
 
   it('can render the background in front', () => {
@@ -40,7 +40,10 @@ describe('Scrollyteller', () => {
     );
 
     const graphic = container.querySelector('.graphic');
-    expect(container.firstElementChild.childNodes.item(1)).toBe(graphic);
+    expect(
+      container.firstElementChild &&
+        container.firstElementChild.childNodes.item(1)
+    ).toBe(graphic);
   });
 
   it('can add first/last className to the first/last panel', () => {
@@ -50,8 +53,9 @@ describe('Scrollyteller', () => {
       </Scrollyteller>
     );
 
-    const panel = container.querySelector('p').parentElement;
-    expect(panel.className.indexOf('first')).toBeGreaterThan(-1);
-    expect(panel.className.indexOf('last')).toBeGreaterThan(-1);
+    const p = container && container.querySelector('p');
+    const panel = p && p.parentElement;
+    expect(panel && panel.className.indexOf('first')).toBeGreaterThan(-1);
+    expect(panel && panel.className.indexOf('last')).toBeGreaterThan(-1);
   });
 });

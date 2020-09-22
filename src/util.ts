@@ -1,10 +1,10 @@
-import * as acto from '@abcnews/alternating-case-to-object';
+import acto from '@abcnews/alternating-case-to-object';
 import {
   exactMountSelector,
   getTrailingMountValue,
   isMount,
   isPrefixedMount,
-  prefixedMountSelector
+  prefixedMountSelector,
 } from '@abcnews/mount-utils';
 import { ACTOConfig, Panel, Scrollyteller } from './types';
 
@@ -33,19 +33,29 @@ export function loadScrollyteller(
   markerName = markerName || 'mark';
   window.__scrollytellers = window.__scrollytellers || {};
 
-  const openingMountValuePrefix: string = `${SELECTOR_COMMON}${name ? `NAME${name}` : ''}`;
-  const openingMountSelector: string = prefixedMountSelector(openingMountValuePrefix);
+  const openingMountValuePrefix: string = `${SELECTOR_COMMON}${
+    name ? `NAME${name}` : ''
+  }`;
+  const openingMountSelector: string = prefixedMountSelector(
+    openingMountValuePrefix
+  );
+
+  name = name || 'scrollyteller';
 
   if (!window.__scrollytellers[name]) {
-    const firstEl: Element = document.querySelector(openingMountSelector);
+    const firstEl: Element | null = document.querySelector(
+      openingMountSelector
+    );
 
-    if (!isMount(firstEl)) {
-      return;
+    if (!isMount(firstEl) || firstEl === null) {
+      throw new Error('Attempting to mount to a non-mount node');
     }
 
-    const config: ACTOConfig = acto(getTrailingMountValue(firstEl, openingMountValuePrefix));
+    const config: ACTOConfig = acto(
+      getTrailingMountValue(firstEl, openingMountValuePrefix)
+    );
 
-    let el: Element = firstEl.nextElementSibling;
+    let el: Element | null = firstEl.nextElementSibling;
     let els: Element[] = [];
     let hasMoreContent: boolean = true;
 
@@ -60,7 +70,7 @@ export function loadScrollyteller(
 
     window.__scrollytellers[name] = {
       mountNode: createMountNode(name, className),
-      panels: loadPanels(els, config, markerName)
+      panels: loadPanels(els, config, markerName),
     };
   }
 
@@ -73,7 +83,11 @@ export function loadScrollyteller(
  * @param initialMarker
  * @param name
  */
-function loadPanels(nodes: Node[], initialMarker: ACTOConfig, name: string): Panel[] {
+function loadPanels(
+  nodes: Node[],
+  initialMarker: ACTOConfig,
+  name: string
+): Panel[] {
   let panels: Panel[] = [];
   let nextConfig: ACTOConfig = initialMarker;
   let nextNodes: Node[] = [];
@@ -86,7 +100,7 @@ function loadPanels(nodes: Node[], initialMarker: ACTOConfig, name: string): Pan
     panels.push({
       id: id++,
       config: nextConfig,
-      nodes: nextNodes
+      nodes: nextNodes,
     });
     nextNodes = [];
   }
@@ -110,7 +124,7 @@ function loadPanels(nodes: Node[], initialMarker: ACTOConfig, name: string): Pan
     } else {
       // Any other nodes just get grouped for the next marker
       nextNodes.push(node);
-      node.parentNode.removeChild(node);
+      node.parentNode && node.parentNode.removeChild(node);
     }
 
     // Any trailing nodes just get added as a last marker
@@ -133,9 +147,15 @@ function loadPanels(nodes: Node[], initialMarker: ACTOConfig, name: string): Pan
  * @param className
  */
 export function createMountNode(name?: string, className?: string): Element {
-  const openingMountValuePrefix: string = `${SELECTOR_COMMON}${name ? `NAME${name}` : ''}`;
-  const openingMountSelector: string = prefixedMountSelector(openingMountValuePrefix);
-  const mountSibling: Element | null = document.querySelector(openingMountSelector);
+  const openingMountValuePrefix: string = `${SELECTOR_COMMON}${
+    name ? `NAME${name}` : ''
+  }`;
+  const openingMountSelector: string = prefixedMountSelector(
+    openingMountValuePrefix
+  );
+  const mountSibling: Element | null = document.querySelector(
+    openingMountSelector
+  );
 
   if (mountSibling === null) {
     throw new Error('Mount node needs a sibling element');

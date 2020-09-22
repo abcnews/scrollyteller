@@ -2,71 +2,71 @@
   "name": "@abcnews/scrollyteller",
   "version": "3.0.1",
   "description": "A scrollytelling React component",
-  "main": "dist/index.js",
-  "scripts": {
-    "test": "jest",
-    "compile": "webpack",
-    "prepublishOnly": "npm run compile && npm run test",
-    "dev": "webpack --watch"
-  },
-  "keywords": [
-    "react",
-    "scrollyteller",
-    "scrollytelling"
-  ],
-  "homepage": "https://github.com/abcnews/scrollyteller#readme",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/abcnews/scrollyteller.git"
-  },
-  "bugs": {
-    "url": "https://github.com/abcnews/scrollyteller/issues"
-  },
-  "author": "Nathan Hoad",
   "license": "MIT",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "engines": {
+    "node": ">=10"
+  },
+  "scripts": {
+    "start": "tsdx watch",
+    "build": "tsdx build",
+    "test": "tsdx test --passWithNoTests",
+    "lint": "tsdx lint",
+    "prepare": "tsdx build",
+    "size": "size-limit",
+    "analyze": "size-limit --why",
+    "analyse": "size-limit --why",
+    "release": "np"
+  },
+  "peerDependencies": {
+    "react": ">=16"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "tsdx lint"
+    }
+  },
+  "prettier": {
+    "printWidth": 80,
+    "semi": true,
+    "singleQuote": true,
+    "trailingComma": "es5"
+  },
+  "module": "dist/scrollyteller.esm.js",
+  "size-limit": [
+    {
+      "path": "dist/scrollyteller.cjs.production.min.js",
+      "limit": "10 KB"
+    },
+    {
+      "path": "dist/scrollyteller.esm.js",
+      "limit": "10 KB"
+    }
+  ],
   "devDependencies": {
-    "@babel/core": "^7.4.4",
-    "@babel/preset-env": "^7.4.4",
-    "@babel/preset-react": "^7.0.0",
-    "@testing-library/react": "^9.3.0",
-    "@types/jest": "^26.0.7",
-    "@types/node": "^12.11.1",
-    "@types/react": "^16.9.43",
-    "babel-loader": "^8.0.6",
-    "core-js": "^3.1.2",
-    "css-loader": "^2.1.1",
+    "@size-limit/preset-small-lib": "^4.6.0",
+    "@testing-library/react": "^11.0.4",
+    "@types/react": "^16.9.49",
+    "@types/react-dom": "^16.9.8",
+    "husky": "^4.3.0",
     "identity-obj-proxy": "^3.0.0",
-    "jest": "^26.1.0",
-    "node-sass": "^4.14.1",
+    "np": "^6.5.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
-    "sass-loader": "^7.1.0",
-    "style-loader": "^0.23.1",
-    "ts-jest": "^26.1.3",
-    "ts-loader": "^6.2.0",
-    "typescript": "^3.6.4",
-    "webpack": "^4.41.2",
-    "webpack-cli": "^3.3.9"
+    "rollup-plugin-postcss": "^3.1.2",
+    "sass": "^1.26.11",
+    "size-limit": "^4.6.0",
+    "tsdx": "^0.14.0",
+    "tslib": "^2.0.1",
+    "typescript": "^4.0.3"
   },
   "dependencies": {
     "@abcnews/alternating-case-to-object": "^2.0.0",
     "@abcnews/mount-utils": "^1.0.0"
-  },
-  "peerDependencies": {
-    "react": "^16.13.1"
-  },
-  "jest": {
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js"
-    ],
-    "transform": {
-      "\\.(ts|tsx)$": "ts-jest"
-    },
-    "moduleNameMapper": {
-      "\\.scss$": "identity-obj-proxy"
-    },
-    "testRegex": ".*\\.test\\.(ts|tsx)$"
   }
 }

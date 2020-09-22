@@ -1,5 +1,5 @@
-.DS_Store
-Thumbs.db
-/dist
 *.log
-/node_modules
+.DS_Store
+node_modules
+.cache
+dist

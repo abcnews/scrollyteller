@@ -1,4 +1,10 @@
-export type ACTOConfigValue = boolean | number | string | boolean[] | number[] | string[];
+export type ACTOConfigValue =
+  | boolean
+  | number
+  | string
+  | boolean[]
+  | number[]
+  | string[];
 
 export type ACTOConfig = {
   [key: string]: ACTOConfigValue;

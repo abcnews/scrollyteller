@@ -1,6 +1,6 @@
 import * as React from 'react';
 const { useEffect, useRef } = React;
-import * as styles from './index.scss';
+import styles from './index.module.scss';
 
 interface Props {
   id?: string;
@@ -10,44 +10,43 @@ interface Props {
   reference?: (baseNode: Element) => void;
 }
 
-const Panel = (props: Props) => {
-  props = {
-    className: '',
-    config: {},
-    nodes: [],
-    ...props
-  };
-
-  const base: React.MutableRefObject<HTMLDivElement> = useRef();
+const Panel = ({
+  id,
+  className = '',
+  config = {},
+  nodes = [],
+  reference,
+}: Props) => {
+  const base = useRef<HTMLDivElement>(null);
 
   // Manage nodes and let the Scrollyteller know about the base DIV
   useEffect(() => {
-    if (props.nodes) {
-      props.nodes.forEach((node) => {
-        base.current.appendChild(node);
+    if (nodes) {
+      nodes.forEach(node => {
+        base.current && base.current.appendChild(node);
       });
     }
 
-    props.reference && props.reference(base.current);
+    reference && base.current && reference(base.current);
 
     return () => {
-      if (props.nodes) {
-        props.nodes.forEach((node) => {
-          base.current.removeChild(node);
+      if (nodes) {
+        nodes.forEach(node => {
+          base.current && base.current.removeChild(node);
         });
       }
     };
   }, []);
 
-  const className = [
-    props.className.replace(/\s+/, '') !== '' ? props.className : styles.base,
-    typeof props.config.theme !== 'undefined' ? styles[props.config.theme] : null,
-    typeof props.config.align !== 'undefined' ? styles[props.config.align] : null
+  const mergedClassName = [
+    className.replace(/\s+/, '') !== '' ? className : styles.base,
+    typeof config.theme !== 'undefined' ? styles[config.theme] : null,
+    typeof config.align !== 'undefined' ? styles[config.align] : null,
   ]
-    .filter((c) => c)
+    .filter(c => c)
     .join(' ');
 
-  return <div ref={base} id={props.id} className={className} />;
+  return <div ref={base} id={id} className={mergedClassName} />;
 };
 
 Panel.displayName = 'Panel';

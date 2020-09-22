@@ -1,8 +1,8 @@
 import * as React from 'react';
 const { createElement, memo, useEffect, useRef, useState } = React;
 import Panel from '../Panel';
-import * as panelStyles from '../Panel/index.scss';
-import * as styles from './index.scss';
+import panelStyles from '../Panel/index.module.scss';
+import styles from './index.module.scss';
 
 interface Props {
   children: any;
@@ -19,16 +19,16 @@ interface Props {
 
 const references: any[] = [];
 
-const cn = (candidates: any[]) => candidates.filter((x: any): string => x).join(' ');
+const cn = (candidates: any[]) =>
+  candidates.filter((x: any): string => x).join(' ');
 
 const Scrollyteller = (props: Props) => {
   props = {
-    panels: [],
     config: {},
-    ...props
+    ...props,
   };
 
-  const base = useRef(null);
+  const base = useRef<HTMLDivElement>(null);
 
   let currentPanel: any = null;
   const [backgroundAttachment, setBackgroundAttachment] = useState('before');
@@ -44,20 +44,23 @@ const Scrollyteller = (props: Props) => {
     if (references.length === 0) return;
 
     // Work out which panel is the current one
-    const fold = window.innerHeight * (config.waypoint ? config.waypoint / 100 : 0.8);
+    const fold =
+      window.innerHeight * (config.waypoint ? config.waypoint / 100 : 0.8);
     const referencesAboveTheFold = references.filter((r: any) => {
       if (!r.element) return false;
       const box = r.element.getBoundingClientRect();
       return box.height !== 0 && box.top < fold;
     });
 
-    let closestReference = referencesAboveTheFold[referencesAboveTheFold.length - 1];
+    let closestReference =
+      referencesAboveTheFold[referencesAboveTheFold.length - 1];
     if (!closestReference) closestReference = references[0];
 
     if (currentPanel !== closestReference.panel) {
       currentPanel = closestReference.panel;
       if (!dontFireInitialMarker) {
-        onMarker(closestReference.panel.config, closestReference.panel.id);
+        onMarker &&
+          onMarker(closestReference.panel.config, closestReference.panel.id);
       }
     }
 
@@ -87,7 +90,9 @@ const Scrollyteller = (props: Props) => {
     // Make sure Twitter cards aren't too wide on mobile
     setTimeout(() => {
       [].slice
-        .call(document.querySelectorAll(`${styles.base} .twitter-tweet-rendered`))
+        .call(
+          document.querySelectorAll(`${styles.base} .twitter-tweet-rendered`)
+        )
         .forEach((card: any) => {
           card.style.setProperty('width', '100%');
         });
@@ -101,7 +106,9 @@ const Scrollyteller = (props: Props) => {
 
   // RENDER
   const graphic = (
-    <div className={`${styles.graphic} ${styles[backgroundAttachment]}`}>{props.children}</div>
+    <div className={`${styles.graphic} ${styles[backgroundAttachment]}`}>
+      {props.children}
+    </div>
   );
   const numPanels = props.panels.length;
 
@@ -118,15 +125,15 @@ const Scrollyteller = (props: Props) => {
             index === 0 && props.firstPanelClassName,
             index === 0 && panelStyles.first,
             index === numPanels - 1 && props.lastPanelClassName,
-            index === numPanels - 1 && panelStyles.last
+            index === numPanels - 1 && panelStyles.last,
           ]),
           key: typeof panel.key !== 'undefined' ? panel.key : panel.id,
           config: {
             ...props.config,
-            ...(panel.config || {})
+            ...(panel.config || {}),
           },
           nodes: panel.nodes,
-          reference: (element: any) => reference(panel, element)
+          reference: (element: any) => reference(panel, element),
         });
       })}
 
