@@ -4,11 +4,13 @@ import Panel from '../Panel';
 import panelStyles from '../Panel/index.module.scss';
 import styles from './index.module.scss';
 
+type OnMarkerCallback = (config: any, id: string) => void;
+
 interface Props {
   children: any;
   panels: any[];
   config?: any;
-  onMarker?: (config: any, id: string) => void;
+  onMarker?: OnMarkerCallback;
   className?: string;
   panelClassName?: string;
   firstPanelClassName?: string;
@@ -30,55 +32,22 @@ const Scrollyteller = (props: Props) => {
 
   const base = useRef<HTMLDivElement>(null);
 
+  // Create and update onMarkerRef to make sure state inside
+  // the onMarker callback is up to date.
+  // This happens because useEffects attaching event listeners
+  // is executed only once, meaning that state inside callbacks (onMarker)
+  // will always have intial values.
+  const onMarkerRef = useRef<OnMarkerCallback | undefined>(props.onMarker);
+  useEffect(() => {
+    onMarkerRef.current = props.onMarker;
+  });
+
   let currentPanel: any = null;
   const [backgroundAttachment, setBackgroundAttachment] = useState('before');
 
   // Track panel divs so we know which one is the current one
   function reference(panel: any, element: any) {
     references.push({ panel, element });
-  }
-
-  function onScroll(_event: any, dontFireInitialMarker?: boolean) {
-    const { config, onMarker } = props;
-
-    if (references.length === 0) return;
-
-    // Work out which panel is the current one
-    const fold =
-      window.innerHeight * (config.waypoint ? config.waypoint / 100 : 0.8);
-    const referencesAboveTheFold = references.filter((r: any) => {
-      if (!r.element) return false;
-      const box = r.element.getBoundingClientRect();
-      return box.height !== 0 && box.top < fold;
-    });
-
-    let closestReference =
-      referencesAboveTheFold[referencesAboveTheFold.length - 1];
-    if (!closestReference) closestReference = references[0];
-
-    if (currentPanel !== closestReference.panel) {
-      currentPanel = closestReference.panel;
-      if (!dontFireInitialMarker) {
-        onMarker &&
-          onMarker(closestReference.panel.config, closestReference.panel.id);
-      }
-    }
-
-    // Work out if the background should be fixed or not
-    if (base.current) {
-      const bounds = base.current.getBoundingClientRect();
-
-      let sticky;
-      if (bounds.top > 0) {
-        sticky = 'before';
-      } else if (bounds.bottom < window.innerHeight) {
-        sticky = 'after';
-      } else {
-        sticky = 'during';
-      }
-
-      setBackgroundAttachment(sticky);
-    }
   }
 
   useEffect(() => {
@@ -102,6 +71,52 @@ const Scrollyteller = (props: Props) => {
     return () => {
       window.removeEventListener('scroll', onScroll);
     };
+
+    function onScroll(_event: any, dontFireInitialMarker?: boolean) {
+      const { config } = props;
+
+      if (references.length === 0) return;
+
+      // Work out which panel is the current one
+      const fold =
+        window.innerHeight * (config.waypoint ? config.waypoint / 100 : 0.8);
+      const referencesAboveTheFold = references.filter((r: any) => {
+        if (!r.element) return false;
+        const box = r.element.getBoundingClientRect();
+        return box.height !== 0 && box.top < fold;
+      });
+
+      let closestReference =
+        referencesAboveTheFold[referencesAboveTheFold.length - 1];
+      if (!closestReference) closestReference = references[0];
+
+      if (currentPanel !== closestReference.panel) {
+        currentPanel = closestReference.panel;
+        if (!dontFireInitialMarker) {
+          onMarkerRef.current &&
+            onMarkerRef.current(
+              closestReference.panel.config,
+              closestReference.panel.id
+            );
+        }
+      }
+
+      // Work out if the background should be fixed or not
+      if (base.current) {
+        const bounds = base.current.getBoundingClientRect();
+
+        let sticky;
+        if (bounds.top > 0) {
+          sticky = 'before';
+        } else if (bounds.bottom < window.innerHeight) {
+          sticky = 'after';
+        } else {
+          sticky = 'during';
+        }
+
+        setBackgroundAttachment(sticky);
+      }
+    }
   }, []);
 
   // RENDER
