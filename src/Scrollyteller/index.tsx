@@ -4,11 +4,13 @@ import Panel from '../Panel';
 import panelStyles from '../Panel/index.module.scss';
 import styles from './index.module.scss';
 
+type OnMarkerCallback = (config: any, id: string) => void;
+
 interface Props {
   children: any;
   panels: any[];
   config?: any;
-  onMarker?: (config: any, id: string) => void;
+  onMarker?: OnMarkerCallback;
   className?: string;
   panelClassName?: string;
   firstPanelClassName?: string;
@@ -35,7 +37,7 @@ const Scrollyteller = (props: Props) => {
   // This happens because useEffects attaching event listeners
   // is executed only once, meaning that state inside callbacks (onMarker)
   // will always have intial values.
-  const onMarkerRef = useRef(null);
+  const onMarkerRef = useRef<OnMarkerCallback | undefined>(props.onMarker);
   useEffect(() => {
     onMarkerRef.current = props.onMarker;
   });
@@ -91,10 +93,11 @@ const Scrollyteller = (props: Props) => {
       if (currentPanel !== closestReference.panel) {
         currentPanel = closestReference.panel;
         if (!dontFireInitialMarker) {
-          onMarkerRef.current(
-            closestReference.panel.config,
-            closestReference.panel.id
-          );
+          onMarkerRef.current &&
+            onMarkerRef.current(
+              closestReference.panel.config,
+              closestReference.panel.id
+            );
         }
       }
 
