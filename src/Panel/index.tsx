@@ -1,5 +1,4 @@
-import * as React from 'react';
-const { useEffect, useRef } = React;
+import React, { useEffect, useRef } from 'react';
 import styles from './index.module.scss';
 
 interface Props {

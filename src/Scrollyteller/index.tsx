@@ -1,5 +1,4 @@
-import * as React from 'react';
-const { createElement, memo, useEffect, useRef, useState } = React;
+import React, { createElement, memo, useEffect, useRef, useState } from 'react';
 import Panel from '../Panel';
 import panelStyles from '../Panel/index.module.scss';
 import styles from './index.module.scss';
