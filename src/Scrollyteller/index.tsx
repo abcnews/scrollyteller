@@ -142,7 +142,12 @@ const Scrollyteller = (props: Props) => {
             index === numPanels - 1 && props.lastPanelClassName,
             index === numPanels - 1 && panelStyles.last,
           ]),
-          key: typeof panel.key !== 'undefined' ? panel.key : panel.id,
+          key:
+            typeof panel.key !== 'undefined'
+              ? panel.key
+              : panel.id
+              ? panel.id
+              : index,
           config: {
             ...props.config,
             ...(panel.config || {}),
