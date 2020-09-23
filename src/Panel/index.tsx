@@ -20,20 +20,16 @@ const Panel = ({
 
   // Manage nodes and let the Scrollyteller know about the base DIV
   useEffect(() => {
-    if (nodes) {
-      nodes.forEach(node => {
-        base.current && base.current.appendChild(node);
-      });
-    }
+    nodes.forEach(node => {
+      base.current && base.current.appendChild(node);
+    });
 
     reference && base.current && reference(base.current);
 
     return () => {
-      if (nodes) {
-        nodes.forEach(node => {
-          base.current && base.current.removeChild(node);
-        });
-      }
+      nodes.forEach(node => {
+        base.current && base.current.removeChild(node);
+      });
     };
   }, []);
 
