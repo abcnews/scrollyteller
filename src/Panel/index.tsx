@@ -56,7 +56,7 @@ const Panel: React.FC<PanelProps> = ({
     .filter(c => c)
     .join(' ');
 
-  return <div ref={base} id={'' + id} className={mergedClassName} />;
+  return <div ref={base} id={String(id)} className={mergedClassName} />;
 };
 
 Panel.displayName = 'Panel';
