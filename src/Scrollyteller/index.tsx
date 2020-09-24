@@ -188,6 +188,4 @@ const Scrollyteller = <T,>({
   );
 };
 
-Scrollyteller.displayName = 'Scrollyteller';
-
 export default Scrollyteller;
