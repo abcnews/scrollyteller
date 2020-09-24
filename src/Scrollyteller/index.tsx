@@ -66,7 +66,7 @@ const Scrollyteller = <T,>({
   const onMarkerRef = useRef(onMarker);
   useEffect(() => {
     onMarkerRef.current = onMarker;
-  });
+  }, [onMarker]);
 
   let currentPanel: PanelDefinition<T> | null = null;
   const [backgroundAttachment, setBackgroundAttachment] = useState('before');
