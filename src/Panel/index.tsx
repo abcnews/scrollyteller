@@ -1,21 +1,36 @@
 import React, { useEffect, useRef } from 'react';
 import styles from './index.module.scss';
 
-interface Props {
-  id?: string;
-  className?: string;
-  config?: any;
-  nodes?: Element[];
-  reference?: (baseNode: Element) => void;
-}
+type ReferenceCallback = (el: HTMLElement) => void;
 
-const Panel = ({
+export type PanelConfig = {
+  theme?: string;
+  align?: string;
+};
+
+export type PanelDefinition<T extends PanelConfig> = {
+  id: number;
+  key?: string;
+  className?: string;
+  config: T;
+  nodes: Node[];
+};
+
+export type PanelProps = {
+  id?: number;
+  className?: string;
+  config?: PanelConfig;
+  nodes?: Node[];
+  reference?: ReferenceCallback;
+};
+
+const Panel: React.FC<PanelProps> = ({
   id,
   className = '',
   config = {},
   nodes = [],
   reference,
-}: Props) => {
+}) => {
   const base = useRef<HTMLDivElement>(null);
 
   // Manage nodes and let the Scrollyteller know about the base DIV
@@ -31,7 +46,7 @@ const Panel = ({
         base.current && base.current.removeChild(node);
       });
     };
-  }, []);
+  }, [base.current]);
 
   const mergedClassName = [
     className.replace(/\s+/, '') !== '' ? className : styles.base,
@@ -41,7 +56,7 @@ const Panel = ({
     .filter(c => c)
     .join(' ');
 
-  return <div ref={base} id={id} className={mergedClassName} />;
+  return <div ref={base} id={'' + id} className={mergedClassName} />;
 };
 
 Panel.displayName = 'Panel';

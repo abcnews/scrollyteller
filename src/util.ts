@@ -1,23 +1,22 @@
 import acto from '@abcnews/alternating-case-to-object';
-import {
-  exactMountSelector,
-  getTrailingMountValue,
-  isMount,
-  isPrefixedMount,
-  prefixedMountSelector,
-} from '@abcnews/mount-utils';
-import { ACTOConfig, Panel, Scrollyteller } from './types';
+import { selectMounts, isMount, getMountValue } from '@abcnews/mount-utils';
+import { PanelConfig, PanelDefinition } from './Panel';
+import { ScrollytellerConfig } from './Scrollyteller';
+
+export type ScrollytellerDefinition<T extends PanelConfig> = {
+  mountNode: Element;
+  panels: PanelDefinition<T>[];
+};
 
 declare global {
   interface Window {
     __scrollytellers: {
-      [key: string]: Scrollyteller;
+      [key: string]: any;
     };
   }
 }
 
 const SELECTOR_COMMON = 'scrollyteller';
-const CLOSING_MOUNT_SELECTOR = exactMountSelector(`end${SELECTOR_COMMON}`);
 
 /**
  * Finds and grabs any nodes between #scrollyteller and #endscrollyteller
@@ -25,34 +24,29 @@ const CLOSING_MOUNT_SELECTOR = exactMountSelector(`end${SELECTOR_COMMON}`);
  * @param className The className to apply to the mount node
  * @param markerName The hash name for markers
  */
-export function loadScrollyteller(
+export const loadScrollyteller = <T>(
   name?: string,
   className?: string,
-  markerName?: string
-): Scrollyteller {
-  markerName = markerName || 'mark';
+  markerName: string = 'mark'
+): ScrollytellerDefinition<T> => {
   window.__scrollytellers = window.__scrollytellers || {};
 
   const openingMountValuePrefix: string = `${SELECTOR_COMMON}${
     name ? `NAME${name}` : ''
   }`;
-  const openingMountSelector: string = prefixedMountSelector(
-    openingMountValuePrefix
-  );
 
   name = name || 'scrollyteller';
 
   if (!window.__scrollytellers[name]) {
-    const firstEl: Element | null = document.querySelector(
-      openingMountSelector
-    );
+    const firstEl: Element | null = selectMounts(openingMountValuePrefix)[0];
+    className && firstEl.classList.add(className);
 
-    if (!isMount(firstEl) || firstEl === null) {
+    if (!isMount(firstEl)) {
       throw new Error('Attempting to mount to a non-mount node');
     }
 
-    const config: ACTOConfig = acto(
-      getTrailingMountValue(firstEl, openingMountValuePrefix)
+    const config: ScrollytellerConfig & T = acto(
+      getMountValue(firstEl, openingMountValuePrefix)
     );
 
     let el: Element | null = firstEl.nextElementSibling;
@@ -60,7 +54,7 @@ export function loadScrollyteller(
     let hasMoreContent: boolean = true;
 
     while (hasMoreContent && el) {
-      if (isMount(el) && el.matches(CLOSING_MOUNT_SELECTOR)) {
+      if (isMount(el, `end${SELECTOR_COMMON}`, true)) {
         hasMoreContent = false;
       } else {
         els.push(el);
@@ -69,13 +63,13 @@ export function loadScrollyteller(
     }
 
     window.__scrollytellers[name] = {
-      mountNode: createMountNode(name, className),
-      panels: loadPanels(els, config, markerName),
+      mountNode: firstEl,
+      panels: loadPanels<T>(els, config, markerName),
     };
   }
 
   return window.__scrollytellers[name];
-}
+};
 
 /**
  * Parse a list of nodes loocking for anchors starting with a given name
@@ -83,13 +77,14 @@ export function loadScrollyteller(
  * @param initialMarker
  * @param name
  */
-function loadPanels(
+const loadPanels = <T>(
   nodes: Node[],
-  initialMarker: ACTOConfig,
+  initialMarker: ScrollytellerConfig &
+    T & { hash?: string; piecemeal?: boolean },
   name: string
-): Panel[] {
-  let panels: Panel[] = [];
-  let nextConfig: ACTOConfig = initialMarker;
+): PanelDefinition<T>[] => {
+  let panels: PanelDefinition<T>[] = [];
+  let nextConfig = initialMarker;
   let nextNodes: Node[] = [];
   let id: number = 0;
 
@@ -107,12 +102,12 @@ function loadPanels(
 
   // Check the section nodes for panels and marker content
   nodes.forEach((node: Node, index: number) => {
-    if (isPrefixedMount(node, name)) {
+    if (isMount(node, name)) {
       // Found a new marker so we should commit the last one
       pushPanel();
 
       // If marker has no config then just use the previous config
-      let configString: string = getTrailingMountValue(node, name);
+      let configString: string = getMountValue(node, name);
 
       if (configString) {
         nextConfig = acto(configString);
@@ -139,38 +134,4 @@ function loadPanels(
   });
 
   return panels;
-}
-
-/**
- * Create a node to mount a scrollyteller on
- * @param name
- * @param className
- */
-export function createMountNode(name?: string, className?: string): Element {
-  const openingMountValuePrefix: string = `${SELECTOR_COMMON}${
-    name ? `NAME${name}` : ''
-  }`;
-  const openingMountSelector: string = prefixedMountSelector(
-    openingMountValuePrefix
-  );
-  const mountSibling: Element | null = document.querySelector(
-    openingMountSelector
-  );
-
-  if (mountSibling === null) {
-    throw new Error('Mount node needs a sibling element');
-  }
-
-  const mountParent: Element | null = mountSibling.parentElement;
-
-  if (mountParent === null) {
-    throw new Error('Mount node needs a parent element');
-  }
-
-  const mountNode: Element = document.createElement('div');
-
-  mountNode.className = className || '';
-  mountParent.insertBefore(mountNode, mountSibling);
-
-  return mountNode;
-}
+};
