@@ -3,6 +3,10 @@ import { selectMounts, isMount, getMountValue } from '@abcnews/mount-utils';
 import { PanelConfig, PanelDefinition } from './Panel';
 import { ScrollytellerConfig } from './Scrollyteller';
 
+type PanelMeta = {
+  piecemeal?: boolean;
+};
+
 export type ScrollytellerDefinition<T extends PanelConfig> = {
   mountNode: Element;
   panels: PanelDefinition<T>[];
@@ -17,6 +21,28 @@ declare global {
 }
 
 const SELECTOR_COMMON = 'scrollyteller';
+
+function excludeScrollytellerConfig<T>(config: ScrollytellerConfig & T): T {
+  const _config = {
+    ...config,
+  };
+
+  delete _config.theme;
+  delete _config.waypoint;
+  delete _config.graphicInFront;
+
+  return _config as T;
+}
+
+function excludePanelMeta<T>(config: PanelMeta & T): T {
+  const _config = {
+    ...config,
+  };
+
+  delete _config.piecemeal;
+
+  return _config as T;
+}
 
 /**
  * Finds and grabs any nodes between #scrollyteller and #endscrollyteller
@@ -45,9 +71,9 @@ export const loadScrollyteller = <T>(
       throw new Error('Attempting to mount to a non-mount node');
     }
 
-    const config: ScrollytellerConfig & T = acto(
+    const config = acto(
       getMountValue(firstEl, openingMountValuePrefix)
-    );
+    ) as ScrollytellerConfig & T;
 
     let el: Element | null = firstEl.nextElementSibling;
     let els: Element[] = [];
@@ -64,7 +90,11 @@ export const loadScrollyteller = <T>(
 
     window.__scrollytellers[name] = {
       mountNode: firstEl,
-      panels: loadPanels<T>(els, config, markerName),
+      panels: loadPanels<T>(
+        els,
+        excludeScrollytellerConfig<T>(config),
+        markerName
+      ),
     };
   }
 
@@ -72,19 +102,18 @@ export const loadScrollyteller = <T>(
 };
 
 /**
- * Parse a list of nodes loocking for anchors starting with a given name
+ * Parse a list of nodes looking for anchors starting with a given name
  * @param nodes
  * @param initialMarker
  * @param name
  */
 const loadPanels = <T>(
   nodes: Node[],
-  initialMarker: ScrollytellerConfig &
-    T & { hash?: string; piecemeal?: boolean },
+  initialConfig: T,
   name: string
 ): PanelDefinition<T>[] => {
   let panels: PanelDefinition<T>[] = [];
-  let nextConfig = initialMarker;
+  let nextConfigAndMeta: PanelMeta & T = initialConfig;
   let nextNodes: Node[] = [];
   let id: number = 0;
 
@@ -94,7 +123,7 @@ const loadPanels = <T>(
 
     panels.push({
       id: id++,
-      config: nextConfig,
+      config: excludePanelMeta<T>(nextConfigAndMeta),
       nodes: nextNodes,
     });
     nextNodes = [];
@@ -110,16 +139,14 @@ const loadPanels = <T>(
       let configString: string = getMountValue(node, name);
 
       if (configString) {
-        nextConfig = acto(configString);
-        nextConfig.hash = configString;
+        nextConfigAndMeta = acto(configString) as T;
       } else {
         // Empty marks should stop the piecemeal flow
-        nextConfig.piecemeal = false;
+        nextConfigAndMeta.piecemeal = false;
       }
     } else {
       // Any other nodes just get grouped for the next marker
       nextNodes.push(node);
-      node.parentNode && node.parentNode.removeChild(node);
     }
 
     // Any trailing nodes just get added as a last marker
@@ -128,9 +155,12 @@ const loadPanels = <T>(
     }
 
     // If piecemeal is on/true then each node has its own box
-    if (nextConfig.piecemeal) {
+    if (nextConfigAndMeta.piecemeal) {
       pushPanel();
     }
+
+    // Remove the node from the document to keep things tidy
+    node.parentNode && node.parentNode.removeChild(node);
   });
 
   return panels;

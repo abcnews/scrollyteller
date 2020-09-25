@@ -10,8 +10,8 @@ import Panel, { PanelProps, PanelConfig, PanelDefinition } from '../Panel';
 import panelStyles from '../Panel/index.module.scss';
 import styles from './index.module.scss';
 
-export interface OnMarkerCallback<T extends PanelConfig> {
-  (config: PanelConfig & T, id: number): void;
+export interface OnMarkerCallback<T> {
+  (config: T, id: number): void;
 }
 
 export type ScrollytellerConfig = {
@@ -23,7 +23,7 @@ export type ScrollytellerConfig = {
 interface ScrollytellerProps<T extends PanelConfig> {
   children: ReactNode;
   panels: PanelDefinition<T>[];
-  config?: T & ScrollytellerConfig;
+  config?: ScrollytellerConfig & T;
   onMarker?: OnMarkerCallback<T>;
   className?: string;
   panelClassName?: string;
