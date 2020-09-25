@@ -7,11 +7,16 @@ import React, {
   useState,
 } from 'react';
 import Panel, { PanelProps, PanelConfig, PanelDefinition } from '../Panel';
+
 import panelStyles from '../Panel/index.module.scss';
+import { cn, uglyTwitterHack } from './functions';
 import styles from './index.module.scss';
 
 export interface OnMarkerCallback<T> {
   (config: T, id: number): void;
+}
+export interface OnProgressCallback {
+  (progress: number): void;
 }
 
 export type ScrollytellerConfig = {
@@ -25,23 +30,18 @@ interface ScrollytellerProps<T extends PanelConfig> {
   panels: PanelDefinition<T>[];
   config?: ScrollytellerConfig & T;
   onMarker?: OnMarkerCallback<T>;
+  onProgress?: OnProgressCallback;
   className?: string;
   panelClassName?: string;
   firstPanelClassName?: string;
   lastPanelClassName?: string;
   panelComponent?: React.FC<PanelProps> | React.ComponentClass<PanelProps>;
-  dontFireInitialMarker?: boolean;
 }
 
 type Reference<T extends PanelConfig> = {
   panel: PanelDefinition<T>;
   element: HTMLElement;
 };
-
-const cn = (candidates: (undefined | null | false | string)[]) =>
-  candidates
-    .filter((x: undefined | null | false | string): boolean => !!x)
-    .join(' ');
 
 const Scrollyteller = <T,>({
   children,
@@ -53,10 +53,10 @@ const Scrollyteller = <T,>({
   lastPanelClassName,
   config,
   onMarker,
-  dontFireInitialMarker,
+  onProgress,
 }: PropsWithChildren<ScrollytellerProps<T>>) => {
   const references = useRef<Reference<T>[]>([]);
-  const base = useRef<HTMLDivElement>(null);
+  const base = useRef<HTMLDivElement>(null!);
 
   // Create and update onMarkerRef to make sure state inside
   // the onMarker callback is up to date.
@@ -64,9 +64,12 @@ const Scrollyteller = <T,>({
   // is executed only once, meaning that state inside callbacks (onMarker)
   // will always have intial values.
   const onMarkerRef = useRef(onMarker);
+  const onProgressRef = useRef(onProgress);
+
   useEffect(() => {
     onMarkerRef.current = onMarker;
-  }, [onMarker]);
+    onProgressRef.current = onProgress;
+  }, [onMarker, onProgress]);
 
   let currentPanel: PanelDefinition<T> | null = null;
   const [backgroundAttachment, setBackgroundAttachment] = useState('before');
@@ -77,55 +80,83 @@ const Scrollyteller = <T,>({
   }
 
   useEffect(() => {
+    let fold: number;
+    setFold();
+
     // Safari tries to do things before styling has kicked in
     // so lets wait for a split second before measuring.
     // Fires inital marker on page load, unless overridden
-    setTimeout(() => onScroll(null, dontFireInitialMarker), 100);
+    setTimeout(onScroll, 100);
 
     // Make sure Twitter cards aren't too wide on mobile
-    setTimeout(() => {
-      [].slice
-        .call(
-          document.querySelectorAll(`${styles.base} .twitter-tweet-rendered`)
-        )
-        .forEach((card: HTMLElement) => {
-          card.style.setProperty('width', '100%');
-        });
-    }, 1000);
+    setTimeout(() => uglyTwitterHack(styles.base), 1000);
 
     window.addEventListener('scroll', onScroll);
+    window.addEventListener('resize', onResize);
     return () => {
       window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onResize);
     };
 
-    function onScroll(_event: Event | null, dontFireInitialMarker?: boolean) {
+    function onResize() {
+      requestAnimationFrame(setFold);
+    }
+
+    function onScroll() {
+      requestAnimationFrame(doWork);
+    }
+
+    function setFold() {
+      fold =
+        window.innerHeight * (config?.waypoint ? config.waypoint / 100 : 0.8);
+    }
+
+    function doWork() {
       if (references.current.length === 0) return;
 
-      // Work out which panel is the current one
-      const fold =
-        window.innerHeight * (config?.waypoint ? config.waypoint / 100 : 0.8);
-      const referencesAboveTheFold = references.current.filter(
-        (r: Reference<T>) => {
-          if (!r.element) return false;
-          const box = r.element.getBoundingClientRect();
-          return box.height !== 0 && box.top < fold;
-        }
+      const baseRect = base.current.getBoundingClientRect();
+
+      // Panel position in relation to fold
+      const panelPositions = references.current
+        .map(r => {
+          const { top } = r.element.getBoundingClientRect();
+          return { r, top, pxAboveFold: fold - top };
+        })
+        .map(({ top, r, pxAboveFold }, i, arr) => {
+          const bottom = arr[i + 1]
+            ? arr[i + 1].top
+            : baseRect.top + baseRect.height;
+          const height = bottom - top;
+          return {
+            r,
+            pctAboveFold: pxAboveFold / height,
+            pxAboveFold,
+            height,
+            top,
+            bottom,
+          };
+        });
+
+      // Find the current panel
+      let current = panelPositions.find(
+        d => d.pctAboveFold > 0 && d.pctAboveFold <= 1
       );
 
-      let closestReference =
-        referencesAboveTheFold[referencesAboveTheFold.length - 1];
-      if (!closestReference) closestReference = references.current[0];
-
-      if (currentPanel !== closestReference.panel) {
-        currentPanel = closestReference.panel;
-        if (!dontFireInitialMarker) {
-          onMarkerRef.current &&
-            onMarkerRef.current(
-              closestReference.panel.config,
-              closestReference.panel.id
-            );
-        }
+      // Before or after the whole thing
+      if (!current) {
+        current =
+          panelPositions[0].pctAboveFold < 0
+            ? panelPositions[0]
+            : panelPositions[panelPositions.length - 1];
       }
+
+      if (currentPanel !== current.r.panel) {
+        currentPanel = current.r.panel;
+        onMarkerRef.current &&
+          onMarkerRef.current(currentPanel.config, currentPanel.id);
+      }
+
+      onProgressRef.current && onProgressRef.current(current.pctAboveFold);
 
       // Work out if the background should be fixed or not
       if (base.current) {
@@ -147,11 +178,11 @@ const Scrollyteller = <T,>({
 
   // RENDER
   const graphic = (
-    <div className={`${styles.graphic} ${styles[backgroundAttachment]}`}>
+    <div className={cn([styles.graphic, styles[backgroundAttachment]])}>
       {children}
     </div>
   );
-  const numPanels = panels.length;
+  const last = panels.length - 1;
 
   return (
     <div ref={base} className={`${styles.base} ${className || ''}`}>
@@ -165,8 +196,8 @@ const Scrollyteller = <T,>({
             panel.className,
             index === 0 && firstPanelClassName,
             index === 0 && panelStyles.first,
-            index === numPanels - 1 && lastPanelClassName,
-            index === numPanels - 1 && panelStyles.last,
+            index === last && lastPanelClassName,
+            index === last && panelStyles.last,
           ]),
           key:
             typeof panel.key !== 'undefined'
