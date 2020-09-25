@@ -59,7 +59,7 @@
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-test-renderer": "^16.13.1",
-    "rollup-plugin-postcss": "^3.1.2",
+    "rollup-plugin-postcss": "^3.1.8",
     "sass": "^1.26.11",
     "size-limit": "^4.6.0",
     "tsdx": "^0.14.0",
@@ -68,6 +68,6 @@
   },
   "dependencies": {
     "@abcnews/alternating-case-to-object": "^2.0.0",
-    "@abcnews/mount-utils": "^1.0.0"
+    "@abcnews/mount-utils": "^2.0.0"
   }
 }

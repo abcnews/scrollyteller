@@ -1,18 +1,18 @@
 import React from 'react';
 import { render } from 'react-dom';
-import App from './components/App';
+import App from './components/AppVanilla';
 
 const PROJECT_NAME: string = 'example-aunty';
-const root = document.querySelector(`[data-${PROJECT_NAME}-root]`);
+const root = document.querySelector(`[data-${PROJECT_NAME}-vanilla]`);
 
 function init() {
-  render(<App projectName={PROJECT_NAME} />, root);
+  root && render(<App projectName={PROJECT_NAME} />, root);
 }
 
 init();
 
 if (module.hot) {
-  module.hot.accept('./components/App', () => {
+  module.hot.accept('./components/AppVanilla', () => {
     try {
       init();
     } catch (err) {
