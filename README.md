@@ -10,24 +10,22 @@ The `panels` prop is in the format of:
 
     [
       {
-        config: {
+        data: {
           info: 'Some kind of config that is given when this marker is active'
         },
         nodes: [<DOM elements for this panel>]
       },
       {
-        config: {
+        data: {
           thing: 'This will be given when the second marker is hit'
         },
         nodes: [<DOM elements for this panel>]
       }
     ]
 
-When a new box comes into view `onMarker` will be called with the `config` of the incoming panel.
+When a new box comes into view `onMarker` will be called with the `data` of the incoming panel.
 
-Example:
-
-```tsx
+```jsx
 import * as React from 'react';
 import Scrollyteller from '@abcnews/scrollyteller';
 
@@ -36,19 +34,23 @@ import GraphicOfSomeKind from './GraphicOfSomeKind';
 
 export default () => {
   const [something, setSomething] = React.useState('');
+  const [progressPct, setProgresPct] = React.useState('');
 
-  // Content is loaded somehow into an array of { conifg: {...}, nodes: [...DOMNodes] }
+  // Content is loaded somehow into an array of { data: {...}, nodes: [...DOMNodes] }
   const panels = ...?
 
   return (
-    <Scrollyteller panels={panels} onMarker={config => setSomething(config.thing)}>
+    <Scrollyteller
+      panels={panels}
+      onMarker={({thing}) => setSomething(data.thing)}
+      onProgress={({pctAboveFold}) => setProgress(pctAboveFold)}>
       <GraphicOfSomeKind property={something} />
     </Scrollyteller>
   );
 }
-
-module.exports = Story;
 ```
+
+For a more complete example using Typescript see the [vanilla example app](example/src/components/AppVanilla/index.tsx).
 
 ### Customising
 
@@ -61,26 +63,20 @@ To completely customise how panels are rendered you can pass in `panelComponent`
 import * as React from 'react';
 
 interface Props {
-  nodes: any[];
-  reference: (base: HTMLElement) => void;
+  nodes: HTMLElement[];
+  reference: (el: HTMLElement) => void;
 }
 
-export default (props: Props) => {
+export default (({nodes, reference}): Props) => {
   const base = React.useRef(null);
   const innerBase = React.useRef(null);
 
   React.useEffect(() => {
-    props.reference(base.current);
-    props.nodes.forEach((node: HTMLElement) => {
+    reference(base.current);
+    nodes.forEach((node: HTMLElement) => {
       innerBase.current.appendChild(node);
     });
-
-    return () => {
-      props.nodes.forEach((node: HTMLElement) => {
-        innerBase.current.removeChild(node);
-      });
-    };
-  }, []);
+  }, [reference]);
 
   return (
     <div ref={base} style={{ zIndex: 1, height: '80vh', fontSize: '40px' }}>
@@ -96,6 +92,8 @@ And then specify `<Scrollyteller panelComponent={CustomPanel}>`.
 ### Usage with Odyssey
 
 When developing [ABC News](https://www.abc.net.au) stories with [Odyssey](https://github.com/abcnews/odyssey) you can use the `loadScrollyteller` function to gather `panels` within a CoreMedia article.
+
+See a more complete [usage example with Odyssey](example/src) in the example project.
 
 CoreMedia text:
 
@@ -122,7 +120,7 @@ const scrollyData = loadScrollyteller(
 
 // Then pass them to the Scrollyteller component
 ReactDOM.render(
-  <Scrollyteller panels={scrollyData.panels} ... />,
+  <Scrollyteller panels={scrollyData.panels} {...scrollyData.config} />,
   scrollyData.mountNode
 );
 
