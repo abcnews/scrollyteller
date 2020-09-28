@@ -1,16 +1,22 @@
 import React from 'react';
 import { render } from 'react-dom';
-import App from './components/AppOdyssey';
-import { loadScrollyteller } from '../../.';
+import App, { MarkerData } from './components/AppOdyssey';
+import { loadScrollyteller, ScrollytellerDefinition } from '../../.';
 
 const PROJECT_NAME: string = 'example-aunty';
 
-let scrollyTellerDefinition;
+let scrollyTellerDefinition: ScrollytellerDefinition<MarkerData>;
 
 function renderApp() {
   if (!scrollyTellerDefinition) {
     scrollyTellerDefinition = loadScrollyteller('', 'u-full');
   }
+
+  // This is totally optional, but demonstrates how you'd add an index parameter to the data
+  // for each panel.
+  scrollyTellerDefinition.panels = scrollyTellerDefinition.panels.map(
+    (d, i) => ({ ...d, index: i })
+  );
 
   render(
     <App scrollyTellerDefinition={scrollyTellerDefinition} />,
@@ -33,7 +39,7 @@ init();
 if (module.hot) {
   module.hot.accept('./components/AppOdyssey', () => {
     try {
-      init();
+      renderApp();
     } catch (err) {
       import('./components/ErrorBox').then(({ default: ErrorBox }) => {
         render(<ErrorBox error={err} />, scrollyTellerDefinition.mountNode);

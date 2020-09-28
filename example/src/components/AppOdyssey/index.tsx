@@ -1,34 +1,36 @@
 import React, { useState } from 'react';
-import Worm from '../Worm';
-import styles from './styles.scss';
 import Scrollyteller, { ScrollytellerDefinition } from '../../../../.';
+import Graphic from '../Graphic';
 
-type MarkerConfig = {
-  theme?: string;
+export type MarkerData = {
+  index: number;
   number: number;
 };
 
 interface AppProps {
-  scrollyTellerDefinition: ScrollytellerDefinition<MarkerConfig>;
+  scrollyTellerDefinition: ScrollytellerDefinition<MarkerData>;
 }
 
-const App: React.FC<AppProps> = ({ scrollyTellerDefinition }) => {
-  const [config, setConfig] = useState<MarkerConfig>(null!);
+//
+const App: React.FC<AppProps> = ({
+  scrollyTellerDefinition: { panels, config },
+}) => {
+  const [data, setData] = useState<MarkerData>(null!);
   const [progress, setProgress] = useState<number>(null!);
+  const [counter, setCounter] = useState<number>(0);
 
   return (
-    <Scrollyteller<MarkerConfig>
-      panels={scrollyTellerDefinition.panels}
-      onMarker={(config, id) => setConfig(config)}
-      onProgress={(progress) => setProgress(progress)}
+    <Scrollyteller<MarkerData>
+      waypoint={0.5}
+      panels={panels}
+      {...config}
+      onMarker={(data) => {
+        setData(data);
+        setCounter(counter + 1);
+      }}
+      onProgress={({ pctAboveFold }) => setProgress(pctAboveFold)}
     >
-      <div className={styles.root}>
-        <Worm />
-        <h1>
-          Mark number {config && config.number} <br />
-          at {(progress * 100).toFixed(2)}% progress
-        </h1>
-      </div>
+      <Graphic panel={data?.number} progress={progress} counter={counter} />
     </Scrollyteller>
   );
 };
