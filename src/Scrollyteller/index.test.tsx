@@ -34,7 +34,7 @@ describe('Scrollyteller', () => {
 
   it('can render the background in front', () => {
     const { container } = render(
-      <Scrollyteller panels={panels} config={{ graphicInFront: true }}>
+      <Scrollyteller panels={panels} graphicInFront={true}>
         <div id="graphic" />
       </Scrollyteller>
     );

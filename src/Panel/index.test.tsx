@@ -8,19 +8,18 @@ describe('Panel', () => {
     p.textContent = 'This is a paragraph';
     const nodes = [p];
 
-    const { getByText } = render(<Panel nodes={nodes} />);
+    const { getByText } = render(
+      <Panel data={{}} reference={() => undefined} nodes={nodes} />
+    );
 
     expect(getByText('This is a paragraph')).not.toBeNull();
   });
 
   it('renders with some config', () => {
     const { container } = render(
-      <Panel nodes={[]} config={{ theme: 'light', align: 'right' }} />
+      <Panel nodes={[]} reference={() => undefined} data={{}} align="right" />
     );
 
-    expect(
-      container.firstElementChild && container.firstElementChild.className
-    ).toContain('light');
     expect(
       container.firstElementChild && container.firstElementChild.className
     ).toContain('right');
