@@ -46,7 +46,7 @@ const Panel: React.FC<PanelProps> = ({
         base.current && base.current.removeChild(node);
       });
     };
-  }, [base.current]);
+  }, []);
 
   const mergedClassName = [
     className.replace(/\s+/, '') !== '' ? className : styles.base,

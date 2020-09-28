@@ -14,14 +14,20 @@ interface AppProps {
 
 const App: React.FC<AppProps> = ({ scrollyTellerDefinition }) => {
   const [config, setConfig] = useState<MarkerConfig>(null!);
+  const [progress, setProgress] = useState<number>(null!);
+
   return (
     <Scrollyteller<MarkerConfig>
       panels={scrollyTellerDefinition.panels}
-      onMarker={(config) => setConfig(config)}
+      onMarker={(config, id) => setConfig(config)}
+      onProgress={(progress) => setProgress(progress)}
     >
       <div className={styles.root}>
         <Worm />
-        <h1>{config && config.number}</h1>
+        <h1>
+          Mark number {config && config.number} <br />
+          at {(progress * 100).toFixed(2)}% progress
+        </h1>
       </div>
     </Scrollyteller>
   );
