@@ -5,41 +5,58 @@ import React, {
   useEffect,
   useRef,
   useState,
+  useMemo,
 } from 'react';
-import Panel, { PanelProps, PanelConfig, PanelDefinition } from '../Panel';
+import Panel, { PanelProps, PanelDefinition } from '../Panel';
 
 import panelStyles from '../Panel/index.module.scss';
 import { cn, uglyTwitterHack } from './functions';
 import styles from './index.module.scss';
 
 export interface OnMarkerCallback<T> {
-  (config: T, id: number): void;
-}
-export interface OnProgressCallback {
-  (progress: number): void;
+  (data: T): void;
 }
 
-export type ScrollytellerConfig = {
-  theme?: string;
-  waypoint?: number;
-  graphicInFront?: boolean;
+type ProgressMeasurements = {
+  pxAboveFold: number;
+  pctAboveFold: number;
+  panelBottom: number;
+  panelHeight: number;
+  height: number;
+  width: number;
+  x: number;
+  y: number;
+  bottom: number;
+  left: number;
+  right: number;
+  top: number;
 };
 
-interface ScrollytellerProps<T extends PanelConfig> {
+export interface OnProgressCallback {
+  (measurements: ProgressMeasurements): void;
+}
+
+export type ScrollytellerTheme = 'light';
+
+interface ScrollytellerProps<T> {
   children: ReactNode;
   panels: PanelDefinition<T>[];
-  config?: ScrollytellerConfig & T;
   onMarker?: OnMarkerCallback<T>;
   onProgress?: OnProgressCallback;
   className?: string;
   panelClassName?: string;
   firstPanelClassName?: string;
   lastPanelClassName?: string;
-  panelComponent?: React.FC<PanelProps> | React.ComponentClass<PanelProps>;
+  waypoint?: number;
+  theme?: ScrollytellerTheme;
+  graphicInFront?: boolean;
+  panelComponent?:
+    | React.FunctionComponent<PanelProps<T>>
+    | React.ComponentClass<PanelProps<T>>;
 }
 
-type Reference<T extends PanelConfig> = {
-  panel: PanelDefinition<T>;
+type Reference<T> = {
+  data: T;
   element: HTMLElement;
 };
 
@@ -51,130 +68,147 @@ const Scrollyteller = <T,>({
   panelClassName,
   firstPanelClassName,
   lastPanelClassName,
-  config,
+  waypoint = 0.8,
+  theme,
+  graphicInFront = false,
   onMarker,
   onProgress,
 }: PropsWithChildren<ScrollytellerProps<T>>) => {
-  const references = useRef<Reference<T>[]>([]);
-  const base = useRef<HTMLDivElement>(null!);
+  // We need a reference to the DOM elements of every panel and the scrollyteller
+  // Component itself so we can measure where they are on scroll.
+  const panelElementReferences = useRef<Reference<T>[]>([]);
+  const componentRef = useRef<HTMLDivElement>(null!);
 
-  // Create and update onMarkerRef to make sure state inside
-  // the onMarker callback is up to date.
-  // This happens because useEffects attaching event listeners
-  // is executed only once, meaning that state inside callbacks (onMarker)
-  // will always have intial values.
+  // Create and update references to the onMarker and onProgress callback functions.
+  // This is an optimisation to avoid having to remove and re-attach scroll and resize
+  // listeners on every render. Managing them separately here means they don't have to
+  // be in the dependencies array for the useEffect block that manages scroll listening.
   const onMarkerRef = useRef(onMarker);
   const onProgressRef = useRef(onProgress);
-
   useEffect(() => {
     onMarkerRef.current = onMarker;
     onProgressRef.current = onProgress;
   }, [onMarker, onProgress]);
 
-  let currentPanel: PanelDefinition<T> | null = null;
-  const [backgroundAttachment, setBackgroundAttachment] = useState('before');
-
   // Track panel divs so we know which one is the current one
-  function reference(panel: PanelDefinition<T>, element: HTMLElement) {
-    references.current.push({ panel, element });
+  // This is warpped in useRef so the Panel components always get the same one function
+  // and it doesn't thrash the useEffect inside Panel
+  function reference(data: T, element: HTMLElement) {
+    panelElementReferences.current = panelElementReferences.current
+      .filter(({ element: e }) => e !== element)
+      .concat({ data, element });
   }
 
+  // Just a small piece of local state
+  const [backgroundAttachment, setBackgroundAttachment] = useState('before');
+
+  // Make sure Twitter cards aren't too wide on mobile
   useEffect(() => {
-    let fold: number;
-    setFold();
+    setTimeout(() => uglyTwitterHack(styles.base), 1000);
+  }, []);
+
+  useEffect(() => {
+    let onScrollFrameRequestId: number;
+    let onResizeFrameRequestId: number;
+    let currentPanelEl: HTMLElement;
+    let waypointPx: number = window.innerHeight * waypoint;
 
     // Safari tries to do things before styling has kicked in
     // so lets wait for a split second before measuring.
     // Fires inital marker on page load, unless overridden
     setTimeout(onScroll, 100);
 
-    // Make sure Twitter cards aren't too wide on mobile
-    setTimeout(() => uglyTwitterHack(styles.base), 1000);
-
     window.addEventListener('scroll', onScroll);
     window.addEventListener('resize', onResize);
+
     return () => {
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', onResize);
+      cancelAnimationFrame(onScrollFrameRequestId);
+      cancelAnimationFrame(onResizeFrameRequestId);
     };
 
     function onResize() {
-      requestAnimationFrame(setFold);
+      waypointPx = window.innerHeight * waypoint;
     }
 
     function onScroll() {
-      requestAnimationFrame(doWork);
-    }
-
-    function setFold() {
-      fold =
-        window.innerHeight * (config?.waypoint ? config.waypoint / 100 : 0.8);
+      onScrollFrameRequestId = requestAnimationFrame(doWork);
     }
 
     function doWork() {
-      if (references.current.length === 0) return;
+      if (panelElementReferences.current.length === 0) return;
 
-      const baseRect = base.current.getBoundingClientRect();
+      const baseRect = componentRef.current.getBoundingClientRect();
 
       // Panel position in relation to fold
-      const panelPositions = references.current
-        .map(r => {
-          const { top } = r.element.getBoundingClientRect();
-          return { r, top, pxAboveFold: fold - top };
-        })
-        .map(({ top, r, pxAboveFold }, i, arr) => {
-          const bottom = arr[i + 1]
-            ? arr[i + 1].top
-            : baseRect.top + baseRect.height;
-          const height = bottom - top;
+      // This is done in two passes because the boundingClientRect is needed for all
+      // panels before the px/pct progress can be accurately measured.
+      const panelPositions = panelElementReferences.current
+        .map(({ data, element }) => {
+          const boundingClientRect = element.getBoundingClientRect();
           return {
-            r,
-            pctAboveFold: pxAboveFold / height,
-            pxAboveFold,
-            height,
-            top,
-            bottom,
+            element,
+            data,
+            measurements: {
+              ...boundingClientRect,
+            },
+          };
+        })
+        .map(({ data, element, measurements }, i, arr) => {
+          const nextPanel = arr[i + 1];
+          const panelBottom = nextPanel
+            ? nextPanel.measurements.top
+            : baseRect.top + baseRect.height;
+          const panelHeight = panelBottom - measurements.top;
+          const pxAboveFold = waypointPx - measurements.top;
+          const pctAboveFold = pxAboveFold / panelHeight;
+          return {
+            element,
+            data,
+            measurements: {
+              ...measurements,
+              pxAboveFold,
+              pctAboveFold,
+              panelBottom,
+              panelHeight,
+            },
           };
         });
 
       // Find the current panel
       let current = panelPositions.find(
-        d => d.pctAboveFold > 0 && d.pctAboveFold <= 1
+        ({ measurements }) =>
+          measurements.pctAboveFold > 0 && measurements.pctAboveFold <= 1
       );
 
       // Before or after the whole thing
       if (!current) {
         current =
-          panelPositions[0].pctAboveFold < 0
+          panelPositions[0].measurements.pctAboveFold < 0
             ? panelPositions[0]
             : panelPositions[panelPositions.length - 1];
       }
 
-      if (currentPanel !== current.r.panel) {
-        currentPanel = current.r.panel;
-        onMarkerRef.current &&
-          onMarkerRef.current(currentPanel.config, currentPanel.id);
+      if (currentPanelEl !== current.element) {
+        currentPanelEl = current.element;
+        onMarkerRef.current && onMarkerRef.current(current.data);
       }
 
-      onProgressRef.current && onProgressRef.current(current.pctAboveFold);
+      onProgressRef.current && onProgressRef.current(current.measurements);
 
       // Work out if the background should be fixed or not
-      if (base.current) {
-        const bounds = base.current.getBoundingClientRect();
-
-        let sticky;
-        if (bounds.top > 0) {
-          sticky = 'before';
-        } else if (bounds.bottom < window.innerHeight) {
-          sticky = 'after';
-        } else {
-          sticky = 'during';
-        }
-
-        setBackgroundAttachment(sticky);
+      let sticky;
+      if (baseRect.top > 0) {
+        sticky = 'before';
+      } else if (baseRect.bottom < window.innerHeight) {
+        sticky = 'after';
+      } else {
+        sticky = 'during';
       }
+      setBackgroundAttachment(sticky);
     }
-  }, []);
+  }, [waypoint]);
 
   // RENDER
   const graphic = (
@@ -182,39 +216,49 @@ const Scrollyteller = <T,>({
       {children}
     </div>
   );
-  const last = panels.length - 1;
+
+  // Memoize the rendered panels
+  const renderedPanels = useMemo(() => {
+    const last = panels.length - 1;
+    return (
+      <>
+        {panels.map((panel, index) => {
+          const data = {
+            ...panel.data,
+          };
+          return createElement(panelComponent || Panel, {
+            className: cn([
+              panelClassName,
+              panelStyles.base,
+              panel.className,
+              index === 0 && firstPanelClassName,
+              index === 0 && panelStyles.first,
+              index === last && lastPanelClassName,
+              index === last && panelStyles.last,
+              theme === 'light' && panelStyles.light,
+            ]),
+            key: index,
+            align: panel.align,
+            data,
+            nodes: panel.nodes,
+            reference: element => reference(data, element),
+          });
+        })}
+      </>
+    );
+  }, [
+    panels,
+    firstPanelClassName,
+    lastPanelClassName,
+    panelClassName,
+    panelComponent,
+  ]);
 
   return (
-    <div ref={base} className={`${styles.base} ${className || ''}`}>
-      {!config?.graphicInFront && graphic}
-
-      {panels.map((panel, index) => {
-        return createElement(panelComponent || Panel, {
-          className: cn([
-            panelClassName,
-            panelStyles.base,
-            panel.className,
-            index === 0 && firstPanelClassName,
-            index === 0 && panelStyles.first,
-            index === last && lastPanelClassName,
-            index === last && panelStyles.last,
-          ]),
-          key:
-            typeof panel.key !== 'undefined'
-              ? panel.key
-              : panel.id
-              ? panel.id
-              : index,
-          config: {
-            ...config,
-            ...(panel.config || {}),
-          },
-          nodes: panel.nodes,
-          reference: element => reference(panel, element),
-        });
-      })}
-
-      {config?.graphicInFront && graphic}
+    <div ref={componentRef} className={`${styles.base} ${className || ''}`}>
+      {!graphicInFront && graphic}
+      {renderedPanels}
+      {graphicInFront && graphic}
     </div>
   );
 };

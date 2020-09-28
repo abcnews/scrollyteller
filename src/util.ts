@@ -1,15 +1,25 @@
 import acto from '@abcnews/alternating-case-to-object';
 import { selectMounts, isMount, getMountValue } from '@abcnews/mount-utils';
-import { PanelConfig, PanelDefinition } from './Panel';
-import { ScrollytellerConfig } from './Scrollyteller';
+import { PanelDefinition, PanelAlignment } from './Panel';
+import { ScrollytellerTheme } from './Scrollyteller';
+
+const piecemeal = Symbol('piecemeal');
 
 type PanelMeta = {
-  piecemeal?: boolean;
+  [piecemeal]?: boolean;
+  align?: PanelAlignment;
 };
 
-export type ScrollytellerDefinition<T extends PanelConfig> = {
+export type ScrollytellerConfig = {
+  theme?: ScrollytellerTheme;
+  waypoint?: number;
+  graphicinfront?: boolean;
+};
+
+export type ScrollytellerDefinition<T extends unknown> = {
   mountNode: Element;
   panels: PanelDefinition<T>[];
+  config: ScrollytellerConfig;
 };
 
 declare global {
@@ -29,17 +39,18 @@ function excludeScrollytellerConfig<T>(config: ScrollytellerConfig & T): T {
 
   delete _config.theme;
   delete _config.waypoint;
-  delete _config.graphicInFront;
+  delete _config.graphicinfront;
 
   return _config as T;
 }
 
-function excludePanelMeta<T>(config: PanelMeta & T): T {
+function excludePanelMeta<T>(config: T & PanelMeta): T {
   const _config = {
     ...config,
   };
 
-  delete _config.piecemeal;
+  delete _config[piecemeal];
+  delete _config.align;
 
   return _config as T;
 }
@@ -90,6 +101,11 @@ export const loadScrollyteller = <T>(
 
     window.__scrollytellers[name] = {
       mountNode: firstEl,
+      config: {
+        waypoint: config.waypoint ? config.waypoint / 100 : undefined,
+        theme: config.theme,
+        graphicInFront: config.graphicinfront,
+      },
       panels: loadPanels<T>(
         els,
         excludeScrollytellerConfig<T>(config),
@@ -115,15 +131,14 @@ const loadPanels = <T>(
   let panels: PanelDefinition<T>[] = [];
   let nextConfigAndMeta: PanelMeta & T = initialConfig;
   let nextNodes: Node[] = [];
-  let id: number = 0;
 
   // Commit the current nodes to a marker
   function pushPanel() {
     if (nextNodes.length === 0) return;
 
     panels.push({
-      id: id++,
-      config: excludePanelMeta<T>(nextConfigAndMeta),
+      align: nextConfigAndMeta.align,
+      data: excludePanelMeta<T>(nextConfigAndMeta),
       nodes: nextNodes,
     });
     nextNodes = [];
@@ -142,7 +157,7 @@ const loadPanels = <T>(
         nextConfigAndMeta = acto(configString) as T;
       } else {
         // Empty marks should stop the piecemeal flow
-        nextConfigAndMeta.piecemeal = false;
+        nextConfigAndMeta[piecemeal] = false;
       }
     } else {
       // Any other nodes just get grouped for the next marker
@@ -155,7 +170,7 @@ const loadPanels = <T>(
     }
 
     // If piecemeal is on/true then each node has its own box
-    if (nextConfigAndMeta.piecemeal) {
+    if (nextConfigAndMeta[piecemeal]) {
       pushPanel();
     }
 

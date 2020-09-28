@@ -3,60 +3,48 @@ import styles from './index.module.scss';
 
 type ReferenceCallback = (el: HTMLElement) => void;
 
-export type PanelConfig = {
-  theme?: string;
-  align?: string;
-};
-
-export type PanelDefinition<T extends PanelConfig> = {
-  id: number;
-  key?: string;
+export type PanelAlignment = 'left' | 'right';
+export type PanelDefinition<T> = {
+  align?: PanelAlignment;
   className?: string;
-  config: T;
+  data: T;
   nodes: Node[];
 };
 
-export type PanelProps = {
-  id?: number;
-  className?: string;
-  config?: PanelConfig;
-  nodes?: Node[];
-  reference?: ReferenceCallback;
+export type PanelProps<T> = PanelDefinition<T> & {
+  reference: ReferenceCallback;
 };
 
-const Panel: React.FC<PanelProps> = ({
-  id,
+const Panel = <T,>({
   className = '',
-  config = {},
   nodes = [],
+  align,
   reference,
-}) => {
+}: PanelProps<T>) => {
   const base = useRef<HTMLDivElement>(null);
 
   // Manage nodes and let the Scrollyteller know about the base DIV
   useEffect(() => {
+    // There is no need to clean up the nodes being attached here. The
+    // reson you might want to is to avoid a memory leak if they're left
+    // lying around, but they're still referenced in the parent anyway and
+    // will no longer be referenced here if this componnent ceases to exist.
+    // TODO: If this component is re-rendered by react ...
     nodes.forEach(node => {
       base.current && base.current.appendChild(node);
     });
 
-    reference && base.current && reference(base.current);
-
-    return () => {
-      nodes.forEach(node => {
-        base.current && base.current.removeChild(node);
-      });
-    };
-  }, []);
+    base.current && reference(base.current);
+  }, [nodes, reference]);
 
   const mergedClassName = [
     className.replace(/\s+/, '') !== '' ? className : styles.base,
-    typeof config.theme !== 'undefined' ? styles[config.theme] : null,
-    typeof config.align !== 'undefined' ? styles[config.align] : null,
+    typeof align !== 'undefined' ? styles[align] : null,
   ]
     .filter(c => c)
     .join(' ');
 
-  return <div ref={base} id={String(id)} className={mergedClassName} />;
+  return <div ref={base} className={mergedClassName} />;
 };
 
 Panel.displayName = 'Panel';
