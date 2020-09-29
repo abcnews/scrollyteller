@@ -15,7 +15,7 @@ function renderApp() {
   // This is totally optional, but demonstrates how you'd add an index parameter to the data
   // for each panel.
   scrollyTellerDefinition.panels = scrollyTellerDefinition.panels.map(
-    (d, i) => ({ ...d, index: i })
+    (d, index) => ({ ...d, data: { ...d.data, index } })
   );
 
   render(
