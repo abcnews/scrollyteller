@@ -146,12 +146,29 @@ const Scrollyteller = <T,>({
       // panels before the px/pct progress can be accurately measured.
       const panelPositions = panelElementReferences.current
         .map(({ data, element }) => {
-          const boundingClientRect = element.getBoundingClientRect();
+          const {
+            top,
+            right,
+            bottom,
+            left,
+            width,
+            height,
+            x,
+            y,
+          } = element.getBoundingClientRect();
+
           return {
             element,
             data,
             measurements: {
-              ...boundingClientRect,
+              top,
+              right,
+              bottom,
+              left,
+              width,
+              height,
+              x,
+              y,
             },
           };
         })
