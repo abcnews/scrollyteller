@@ -1,48 +1,44 @@
 import React, { useState } from 'react';
-import Worm from '../Worm';
-import styles from './styles.scss';
+import Graphic from '../Graphic';
 import { loremIpsum } from 'lorem-ipsum';
-import Scrollyteller from '../../../../dist';
+import Scrollyteller, { PanelDefinition } from '../../../../dist';
 
-interface AppProps {
-  projectName: string;
-}
-
-type MarkerConfig = {
+type MarkerData = {
+  index: number;
   number: number;
 };
 
+interface AppProps {}
+
+// Generate some example panels for use in the <Scrollyteller> component.
 const text = loremIpsum({ count: 7, units: 'paragraph' });
 const pars = text.split('\n').map((t, i) => <p key={i}>{t}</p>);
-const panels = text.split('\n').map((t, i) => {
+const panels: PanelDefinition<MarkerData>[] = text.split('\n').map((t, i) => {
   const p = document.createElement('p');
   p.textContent = t;
   return {
-    id: i,
-    config: { id: i, number: i + 1 },
+    data: { index: i, number: i + 1 },
     nodes: [p],
   };
 });
 
-const App: React.FC<AppProps> = ({ projectName }) => {
-  const [config, setConfig] = useState<MarkerConfig>(null!);
+const App: React.FC<AppProps> = ({}) => {
+  const [data, setData] = useState<MarkerData>(null!);
   const [progress, setProgress] = useState<number>(null!);
+  const [counter, setCounter] = useState<number>(0);
 
   return (
     <>
       {pars}
-      <Scrollyteller<MarkerConfig>
+      <Scrollyteller<MarkerData>
         panels={panels}
-        onMarker={(config) => setConfig(config)}
-        onProgress={(progress) => setProgress(progress)}
+        onMarker={(data) => {
+          setData(data);
+          setCounter(counter + 1);
+        }}
+        onProgress={({ pctAboveFold }) => setProgress(pctAboveFold)}
       >
-        <div className={styles.root}>
-          <Worm />
-          <h1>
-            Mark number {config && config.number} <br />
-            at {(progress * 100).toFixed(2)}% progress
-          </h1>
-        </div>
+        <Graphic panel={data?.number} progress={progress} counter={counter} />
       </Scrollyteller>
       {pars}
     </>
