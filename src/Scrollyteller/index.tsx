@@ -264,6 +264,7 @@ const Scrollyteller = <T,>({
       </>
     );
   }, [
+    theme,
     panels,
     firstPanelClassName,
     lastPanelClassName,
