@@ -201,3 +201,5 @@ if (__DEV__) {
 - Simon Elvery ([elvery.simon@abc.net.au](mailto:elvery.simon@abc.net.au))
 - Joshua Byrd ([byrd.joshua@abc.net.au](mailto:byrd.joshua@abc.net.au))
 - Colin Gourlay ([gourlay.colin@abc.net.au](mailto:gourlay.colin@abc.net.au))
+
+See the [full list of contributors](https://github.com/abcnews/scrollyteller/graphs/contributors).
