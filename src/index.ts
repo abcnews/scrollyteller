@@ -6,5 +6,5 @@ export default Scrollyteller;
 export { loadScrollyteller } from './util';
 
 // Extensible Types
-export { ScrollytellerDefinition } from './util';
+export { ScrollytellerDefinition, ScrollytellerConfig } from './util';
 export { PanelDefinition } from './Panel';
