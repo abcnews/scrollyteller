@@ -10,8 +10,9 @@
 }
 
 .graphic {
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: calc(var(--vh, 1vh) * 100);
+  transition: height 0.3s ease-out;
   z-index: 1;
 
   // Chrome fix https://stackoverflow.com/a/28906246/955917
@@ -37,12 +38,5 @@
 .after {
   position: absolute;
   bottom: 0;
-  height: 100vh !important;
   overflow: hidden;
-}
-
-@media only screen and (max-width: 667px) {
-  .base {
-    height: 100%;
-  }
 }
