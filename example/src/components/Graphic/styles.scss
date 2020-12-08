@@ -19,4 +19,55 @@
     line-height: normal !important;
     letter-spacing: normal !important;
   }
+
+  .t,
+  .r,
+  .b,
+  .l,
+  .tl,
+  .tr,
+  .br,
+  .bl {
+    position: absolute;
+    background: white;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+
+  .t,
+  .b {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .l,
+  .r {
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .t,
+  .tl,
+  .tr {
+    top: 0;
+  }
+
+  .b,
+  .br,
+  .bl {
+    bottom: 0;
+  }
+
+  .l,
+  .tl,
+  .bl {
+    left: 0;
+  }
+
+  .r,
+  .br,
+  .tr {
+    right: 0;
+  }
 }
