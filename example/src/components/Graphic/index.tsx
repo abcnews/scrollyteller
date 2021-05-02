@@ -19,6 +19,14 @@ const Graphic: React.FC<GraphicProps> = ({ panel, progress, counter }) => {
       <p>
         The <code>onMarker</code> callback has been called {counter} times.
       </p>
+      <div className={styles.tl}></div>
+      <div className={styles.tr}></div>
+      <div className={styles.br}></div>
+      <div className={styles.bl}></div>
+      <div className={styles.t}></div>
+      <div className={styles.r}></div>
+      <div className={styles.b}></div>
+      <div className={styles.l}></div>
     </div>
   );
 };

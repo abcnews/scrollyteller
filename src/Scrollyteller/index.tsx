@@ -129,7 +129,9 @@ const Scrollyteller = <T,>({
     };
 
     function onResize() {
-      waypointPx = window.innerHeight * waypoint;
+      const height = window.innerHeight;
+      waypointPx = height * waypoint;
+      componentRef.current.style.setProperty('--vh', `${height / 100}px`);
     }
 
     function onScroll() {
