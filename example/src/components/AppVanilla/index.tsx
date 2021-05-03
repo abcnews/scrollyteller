@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Graphic from '../Graphic';
 import { loremIpsum } from 'lorem-ipsum';
-import Scrollyteller, { PanelDefinition } from '../../../../dist';
+import Scrollyteller, { PanelDefinition } from '../../../../.';
 
 type MarkerData = {
   index: number;
