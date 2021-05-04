@@ -6,6 +6,7 @@ import React, {
   useRef,
   useState,
   useMemo,
+  useCallback,
 } from 'react';
 import Panel, { PanelProps, PanelDefinition } from '../Panel';
 
@@ -93,11 +94,17 @@ const Scrollyteller = <T,>({
   // Track panel divs so we know which one is the current one
   // This is warpped in useRef so the Panel components always get the same one function
   // and it doesn't thrash the useEffect inside Panel
-  function reference(data: T, element: HTMLElement) {
-    panelElementReferences.current = panelElementReferences.current
-      .filter(({ element: e }) => e !== element)
-      .concat({ data, element });
-  }
+  const reference = useCallback(
+    (data: T, element: HTMLElement, unregister: boolean = false) => {
+      const other = panelElementReferences.current.filter(
+        ({ element: e }) => e !== element
+      );
+      panelElementReferences.current = unregister
+        ? other
+        : other.concat({ data, element });
+    },
+    []
+  );
 
   // Just a small piece of local state
   const [backgroundAttachment, setBackgroundAttachment] = useState('before');
@@ -260,7 +267,8 @@ const Scrollyteller = <T,>({
             align: panel.align,
             data,
             nodes: panel.nodes,
-            reference: element => reference(data, element),
+            reference: (element: HTMLElement, unregister: boolean = false) =>
+              reference(data, element, unregister),
           });
         })}
       </>
@@ -272,6 +280,7 @@ const Scrollyteller = <T,>({
     lastPanelClassName,
     panelClassName,
     panelComponent,
+    reference,
   ]);
 
   return (

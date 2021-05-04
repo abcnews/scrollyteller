@@ -22,7 +22,7 @@ const panels: PanelDefinition<MarkerData>[] = text.split('\n').map((t, i) => {
   };
 });
 
-const App: React.FC<AppProps> = ({}) => {
+const App: React.FC<AppProps> = () => {
   const [data, setData] = useState<MarkerData>(null!);
   const [progress, setProgress] = useState<number>(null!);
   const [counter, setCounter] = useState<number>(0);

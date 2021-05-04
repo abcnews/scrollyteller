@@ -86,8 +86,8 @@ export const loadScrollyteller = <T>(
       getMountValue(firstEl, openingMountValuePrefix)
     ) as ScrollytellerConfig & T;
 
+    const els: Element[] = [];
     let el: Element | null = firstEl.nextElementSibling;
-    let els: Element[] = [];
     let hasMoreContent: boolean = true;
 
     while (hasMoreContent && el) {
@@ -128,7 +128,7 @@ const loadPanels = <T>(
   initialConfig: T,
   name: string
 ): PanelDefinition<T>[] => {
-  let panels: PanelDefinition<T>[] = [];
+  const panels: PanelDefinition<T>[] = [];
   let nextConfigAndMeta: PanelMeta & T = initialConfig;
   let nextNodes: Node[] = [];
 
@@ -151,7 +151,7 @@ const loadPanels = <T>(
       pushPanel();
 
       // If marker has no config then just use the previous config
-      let configString: string = getMountValue(node, name);
+      const configString: string = getMountValue(node, name);
 
       if (configString) {
         nextConfigAndMeta = acto(configString) as T;
