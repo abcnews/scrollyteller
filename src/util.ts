@@ -154,7 +154,7 @@ const loadPanels = <T>(
       const configString: string = getMountValue(node, name);
 
       if (configString) {
-        nextConfigAndMeta = acto(configString) as T;
+        nextConfigAndMeta = (acto(configString) as unknown) as T;
       } else {
         // Empty marks should stop the piecemeal flow
         nextConfigAndMeta[piecemeal] = false;

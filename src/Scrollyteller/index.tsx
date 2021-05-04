@@ -75,9 +75,9 @@ const Scrollyteller = <T,>({
   onMarker,
   onProgress,
 }: PropsWithChildren<ScrollytellerProps<T>>) => {
-  // We need a reference to the DOM elements of every panel and the scrollyteller
-  // Component itself so we can measure where they are on scroll.
+  // We need a reference to the DOM elements of every panel ...
   const panelElementReferences = useRef<Reference<T>[]>([]);
+  // ... and the scrollyteller component itself so we can measure where they are on scroll.
   const componentRef = useRef<HTMLDivElement>(null!);
 
   // Create and update references to the onMarker and onProgress callback functions.
@@ -142,6 +142,12 @@ const Scrollyteller = <T,>({
 
       const baseRect = componentRef.current.getBoundingClientRect();
 
+      // Overall progress
+      const overall = {
+        pxAboveFold: waypointPx - baseRect.top,
+        pctAboveFold: (waypointPx - baseRect.top) / baseRect.height,
+      };
+
       // Panel position in relation to fold
       // This is done in two passes because the boundingClientRect is needed for all
       // panels before the px/pct progress can be accurately measured.
@@ -190,6 +196,7 @@ const Scrollyteller = <T,>({
               pctAboveFold,
               panelBottom,
               panelHeight,
+              overall,
             },
           };
         });
