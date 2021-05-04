@@ -115,8 +115,6 @@ const Scrollyteller = <T,>({
   }, []);
 
   useEffect(() => {
-    let onScrollFrameRequestId: number;
-    let onResizeFrameRequestId: number;
     let currentPanelEl: HTMLElement;
     let waypointPx: number = window.innerHeight * waypoint;
 
@@ -131,8 +129,6 @@ const Scrollyteller = <T,>({
     return () => {
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', onResize);
-      cancelAnimationFrame(onScrollFrameRequestId);
-      cancelAnimationFrame(onResizeFrameRequestId);
     };
 
     function onResize() {
@@ -142,10 +138,6 @@ const Scrollyteller = <T,>({
     }
 
     function onScroll() {
-      onScrollFrameRequestId = requestAnimationFrame(doWork);
-    }
-
-    function doWork() {
       if (panelElementReferences.current.length === 0) return;
 
       const baseRect = componentRef.current.getBoundingClientRect();
