@@ -6,6 +6,7 @@ import React, {
   useRef,
   useState,
   useMemo,
+  useCallback,
 } from 'react';
 import Panel, { PanelProps, PanelDefinition } from '../Panel';
 
@@ -74,9 +75,9 @@ const Scrollyteller = <T,>({
   onMarker,
   onProgress,
 }: PropsWithChildren<ScrollytellerProps<T>>) => {
-  // We need a reference to the DOM elements of every panel and the scrollyteller
-  // Component itself so we can measure where they are on scroll.
+  // We need a reference to the DOM elements of every panel ...
   const panelElementReferences = useRef<Reference<T>[]>([]);
+  // ... and the scrollyteller component itself so we can measure where they are on scroll.
   const componentRef = useRef<HTMLDivElement>(null!);
 
   // Create and update references to the onMarker and onProgress callback functions.
@@ -93,11 +94,17 @@ const Scrollyteller = <T,>({
   // Track panel divs so we know which one is the current one
   // This is warpped in useRef so the Panel components always get the same one function
   // and it doesn't thrash the useEffect inside Panel
-  function reference(data: T, element: HTMLElement) {
-    panelElementReferences.current = panelElementReferences.current
-      .filter(({ element: e }) => e !== element)
-      .concat({ data, element });
-  }
+  const reference = useCallback(
+    (data: T, element: HTMLElement, unregister: boolean = false) => {
+      const other = panelElementReferences.current.filter(
+        ({ element: e }) => e !== element
+      );
+      panelElementReferences.current = unregister
+        ? other
+        : other.concat({ data, element });
+    },
+    []
+  );
 
   // Just a small piece of local state
   const [backgroundAttachment, setBackgroundAttachment] = useState('before');
@@ -108,8 +115,6 @@ const Scrollyteller = <T,>({
   }, []);
 
   useEffect(() => {
-    let onScrollFrameRequestId: number;
-    let onResizeFrameRequestId: number;
     let currentPanelEl: HTMLElement;
     let waypointPx: number = window.innerHeight * waypoint;
 
@@ -124,8 +129,6 @@ const Scrollyteller = <T,>({
     return () => {
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', onResize);
-      cancelAnimationFrame(onScrollFrameRequestId);
-      cancelAnimationFrame(onResizeFrameRequestId);
     };
 
     function onResize() {
@@ -135,13 +138,15 @@ const Scrollyteller = <T,>({
     }
 
     function onScroll() {
-      onScrollFrameRequestId = requestAnimationFrame(doWork);
-    }
-
-    function doWork() {
       if (panelElementReferences.current.length === 0) return;
 
       const baseRect = componentRef.current.getBoundingClientRect();
+
+      // Overall progress
+      const overall = {
+        pxAboveFold: waypointPx - baseRect.top,
+        pctAboveFold: (waypointPx - baseRect.top) / baseRect.height,
+      };
 
       // Panel position in relation to fold
       // This is done in two passes because the boundingClientRect is needed for all
@@ -191,6 +196,7 @@ const Scrollyteller = <T,>({
               pctAboveFold,
               panelBottom,
               panelHeight,
+              overall,
             },
           };
         });
@@ -260,7 +266,8 @@ const Scrollyteller = <T,>({
             align: panel.align,
             data,
             nodes: panel.nodes,
-            reference: element => reference(data, element),
+            reference: (element: HTMLElement, unregister: boolean = false) =>
+              reference(data, element, unregister),
           });
         })}
       </>
@@ -272,6 +279,7 @@ const Scrollyteller = <T,>({
     lastPanelClassName,
     panelClassName,
     panelComponent,
+    reference,
   ]);
 
   return (
