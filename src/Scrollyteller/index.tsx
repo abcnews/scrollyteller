@@ -31,6 +31,10 @@ type ProgressMeasurements = {
   left: number;
   right: number;
   top: number;
+  overall: {
+    pctAboveFold: number;
+    pxAboveFold: number;
+  };
 };
 
 export interface OnProgressCallback {
@@ -151,7 +155,9 @@ const Scrollyteller = <T,>({
       // Panel position in relation to fold
       // This is done in two passes because the boundingClientRect is needed for all
       // panels before the px/pct progress can be accurately measured.
-      const panelPositions = panelElementReferences.current
+      const panelPositions: (Reference<T> & {
+        measurements: ProgressMeasurements;
+      })[] = panelElementReferences.current
         .map(({ data, element }) => {
           const {
             top,
