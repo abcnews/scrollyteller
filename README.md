@@ -42,7 +42,7 @@ export default () => {
   return (
     <Scrollyteller
       panels={panels}
-      onMarker={({thing}) => setSomething(data.thing)}
+      onMarker={({thing}) => setSomething(thing)}
       onProgress={({pctAboveFold}) => setProgress(pctAboveFold)}>
       <GraphicOfSomeKind property={something} />
     </Scrollyteller>
