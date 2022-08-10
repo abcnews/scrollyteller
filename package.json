@@ -1,5 +1,5 @@
 {
-  "name": "scrollyteller-panel-fix",
+  "name": "@abcnews/scrollyteller",
   "version": "4.1.1",
   "description": "A scrollytelling React component",
   "repository": {
@@ -21,7 +21,7 @@
     "start": "tsdx watch",
     "build": "tsdx build",
     "test": "tsdx test --passWithNoTests",
-    "lint": "",
+    "lint": "tsdx lint",
     "prepare": "tsdx build && husky install",
     "size": "size-limit",
     "analyze": "size-limit --why",
