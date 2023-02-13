@@ -2,6 +2,10 @@
 
 A scrollyteller component for React
 
+## Installation
+
+`npm install @abcnews/scrollyteller`
+
 ## Usage
 
 The scrollyteller takes a series of **panels** of content nodes and turns them into a series of elements which scroll over the `<Scrollyteller>` component's children.
