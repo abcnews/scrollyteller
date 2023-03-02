@@ -185,7 +185,8 @@ const Scrollyteller = <T,>({
             },
           };
         })
-        .map(({ data, element, measurements }, i, arr) => {
+        .map(({ element, measurements }, i, arr) => {
+          const actualPanelData = panels[i].data;
           const nextPanel = arr[i + 1];
           const panelBottom = nextPanel
             ? nextPanel.measurements.top
@@ -195,7 +196,7 @@ const Scrollyteller = <T,>({
           const pctAboveFold = pxAboveFold / panelHeight;
           return {
             element,
-            data,
+            data: actualPanelData,
             measurements: {
               ...measurements,
               pxAboveFold,
